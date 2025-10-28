@@ -2,9 +2,9 @@ import { registerAs } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { config as dotenvConfig } from 'dotenv';
 
+// Carga el archivo .env (puedes cambiarlo si usas .development.env)
 dotenvConfig({ path: '.development.env' });
 
-// Detectar entorno
 const isDev = process.env.NODE_ENV !== 'production';
 
 const config: DataSourceOptions = {
@@ -15,15 +15,12 @@ const config: DataSourceOptions = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 
-  // 🔹 Solo para desarrollo
-  dropSchema: isDev,      
-  synchronize: isDev,     
+  // Solo para desarrollo
+  dropSchema: false,
+  synchronize: isDev,
 
-  // Entidades y migraciones
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-
-  // Opcional: logging
   logging: isDev,
 };
 
