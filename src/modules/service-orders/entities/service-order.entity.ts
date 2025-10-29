@@ -5,8 +5,8 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
-import { Provider } from 'src/providers/entities/provider.entity';
+import { User } from 'src/modules/users/entities/user.entity';
+import { Provider } from 'src/modules/providers/entities/provider.entity';
 
 @Entity({ name: 'service_orders' })
 export class ServiceOrder {
@@ -28,6 +28,8 @@ export class ServiceOrder {
   @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Provider, (provider) => provider.orders, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Provider, (provider) => provider.orders, {
+    onDelete: 'CASCADE',
+  })
   provider: Provider;
 }
