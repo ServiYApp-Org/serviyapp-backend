@@ -1,34 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ProvidersService } from './providers.service';
+import { Controller, Post, Body } from '@nestjs/common';
+import { AuthService } from 'src/modules/auth/auth.service';
 import { CreateProviderDto } from './dto/create-provider.dto';
-import { UpdateProviderDto } from './dto/update-provider.dto';
 
 @Controller('providers')
 export class ProvidersController {
-  constructor(private readonly providersService: ProvidersService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createProviderDto: CreateProviderDto) {
-    return this.providersService.create(createProviderDto);
+  @Post('login')
+  async login(@Body() body: { email: string; password: string }) {
+    return this.authService.loginProvider(body.email, body.password);
   }
 
-  @Get()
-  findAll() {
-    return this.providersService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.providersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProviderDto: UpdateProviderDto) {
-    return this.providersService.update(+id, updateProviderDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.providersService.remove(+id);
+  @Post('register')
+  async register(@Body() body: CreateProviderDto) {
+    return this.authService.registerProvider(body);
   }
 }

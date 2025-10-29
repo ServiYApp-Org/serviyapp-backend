@@ -4,12 +4,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import typeormConfig from './config/typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
+// módulos principales
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ProvidersModule } from './modules/providers/providers.module';
 import { ServicesModule } from './modules/services/services.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ServiceOrdersModule } from './modules/service-orders/service-orders.module';
+import { LocationsModule } from './modules/locations/locations.module'; 
 
 @Module({
   imports: [
@@ -36,6 +39,7 @@ import { ServiceOrdersModule } from './modules/service-orders/service-orders.mod
     ServicesModule,
     CategoriesModule,
     ServiceOrdersModule,
+    LocationsModule, 
   ],
   controllers: [AppController],
   providers: [AppService],

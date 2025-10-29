@@ -1,39 +1,45 @@
+import { Length } from 'class-validator';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
   CreateDateColumn,
+  Check,
 } from 'typeorm';
 import { ServiceOrder } from 'src/modules/service-orders/entities/service-order.entity';
+import { Role } from 'src/modules/auth/roles.enum';
 
+@Check(`"names" ~ '^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{2,50}$'`)
+@Check(`"surnames" ~ '^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{2,50}$'`)
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 100 })
-  firstName: string;
+  @Column({ type: 'varchar', length: 50, nullable: false, })
+  names: string;
 
-  @Column({ length: 100 })
-  lastName: string;
+  @Column({ type: 'varchar', length: 50, nullable: false, })
+  surnames: string;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true, nullable: false, })
   email: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, })
   password: string;
 
-  @Column({ length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string;
 
-  @Column({ default: 'user' })
-  role: string;
 
-  @Column({ default: 'active' })
+  @Column({ type: 'enum', enum: Role, default: Role.User })
+  role: Role;
+
+  @Column({ type: 'varchar', default: 'active' })
   status: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   profilePicture: string;
 
   @CreateDateColumn({ type: 'timestamp' })
