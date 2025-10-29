@@ -5,8 +5,8 @@ import {
   OneToMany,
   CreateDateColumn,
 } from 'typeorm';
-import { ServiceOrder } from 'src/service-orders/entities/service-order.entity';
-import { Service } from 'src/services/entities/service.entity';
+import { ServiceOrder } from 'src/modules/service-orders/entities/service-order.entity';
+import { Service } from 'src/modules/services/entities/service.entity';
 
 @Entity({ name: 'providers' })
 export class Provider {

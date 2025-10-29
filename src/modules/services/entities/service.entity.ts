@@ -5,8 +5,8 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from 'typeorm';
-import { Provider } from 'src/providers/entities/provider.entity';
-import { Category } from 'src/categories/entities/category.entity';
+import { Provider } from 'src/modules/providers/entities/provider.entity';
+import { Category } from 'src/modules/categories/entities/category.entity';
 
 @Entity({ name: 'services' })
 export class Service {
@@ -31,7 +31,9 @@ export class Service {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @ManyToOne(() => Provider, (provider) => provider.services, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Provider, (provider) => provider.services, {
+    onDelete: 'CASCADE',
+  })
   provider: Provider;
 
   @ManyToOne(() => Category, (category) => category.services)

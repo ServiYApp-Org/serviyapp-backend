@@ -5,7 +5,7 @@ import {
   OneToMany,
   CreateDateColumn,
 } from 'typeorm';
-import { ServiceOrder } from 'src/service-orders/entities/service-order.entity';
+import { ServiceOrder } from 'src/modules/service-orders/entities/service-order.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -28,7 +28,7 @@ export class User {
   phone: string;
 
   @Column({ default: 'user' })
-  role: string; 
+  role: string;
 
   @Column({ default: 'active' })
   status: string;
@@ -38,7 +38,6 @@ export class User {
 
   @CreateDateColumn({ type: 'timestamp' })
   registrationDate: Date;
-
 
   @OneToMany(() => ServiceOrder, (order) => order.user)
   orders: ServiceOrder[];
