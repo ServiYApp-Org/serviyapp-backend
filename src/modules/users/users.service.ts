@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -11,7 +10,7 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  // Buscar por email (ya lo tienes)
+  // Buscar usuario por email
   async findByEmail(email: string): Promise<User | null> {
     if (!email) return null;
     return this.userRepository.findOne({
@@ -19,30 +18,30 @@ export class UsersService {
     });
   }
 
-  // Crear usuario (usado por authService)
+  // Crear usuario (usado por AuthService)
   async create(data: Partial<User>): Promise<User> {
     const newUser = this.userRepository.create(data);
     return this.userRepository.save(newUser);
   }
 
-  // Obtener todos los usuarios
+  // Listar todos los usuarios
   async findAll(): Promise<User[]> {
     return this.userRepository.find({
       order: { registrationDate: 'DESC' },
     });
   }
 
-  // Obtener usuario por ID
+  // Buscar usuario por ID
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     return user;
   }
 
-  // Actualizar usuario
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  // Actualizar usuario (permite campos internos como isCompleted)
+  async update(id: string, data: Partial<User>): Promise<User> {
     const user = await this.findOne(id);
-    Object.assign(user, updateUserDto);
+    Object.assign(user, data);
     return await this.userRepository.save(user);
   }
 

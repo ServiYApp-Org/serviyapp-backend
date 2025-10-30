@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Provider } from './entities/provider.entity';
-import { UpdateProviderDto } from './dto/update-provider.dto';
 
 @Injectable()
 export class ProvidersService {
@@ -11,7 +10,7 @@ export class ProvidersService {
     private readonly providerRepository: Repository<Provider>,
   ) {}
 
-  // Buscar por correo
+  // Buscar proveedor por correo
   async findByEmail(email: string): Promise<Provider | null> {
     if (!email) return null;
     return this.providerRepository.findOne({
@@ -19,7 +18,8 @@ export class ProvidersService {
     });
   }
 
-  // Crear nuevo proveedor (usado por AuthService)
+  
+  // Crear proveedor (usado por AuthService)
   async create(data: Partial<Provider>): Promise<Provider> {
     const newProvider = this.providerRepository.create(data);
     return this.providerRepository.save(newProvider);
@@ -33,6 +33,12 @@ export class ProvidersService {
     });
   }
 
+  async findByUsername(userName: string): Promise<Provider | null> {
+    if (!userName) return null;
+    return this.providerRepository.findOne({ where: { userName } });
+  }
+
+
   // Obtener proveedor por ID
   async findOne(id: string): Promise<Provider> {
     const provider = await this.providerRepository.findOne({
@@ -44,9 +50,9 @@ export class ProvidersService {
   }
 
   // Actualizar proveedor
-  async update(id: string, updateProviderDto: UpdateProviderDto): Promise<Provider> {
+  async update(id: string, data: Partial<Provider>): Promise<Provider> {
     const provider = await this.findOne(id);
-    Object.assign(provider, updateProviderDto);
+    Object.assign(provider, data);
     return await this.providerRepository.save(provider);
   }
 
@@ -56,3 +62,4 @@ export class ProvidersService {
     await this.providerRepository.remove(provider);
   }
 }
+

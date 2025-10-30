@@ -71,7 +71,7 @@ export class CreateProviderDto {
   @IsNotEmpty({ message: 'Debe seleccionar una ciudad válida' })
   cityId: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString({ message: 'La dirección debe ser una cadena de texto' })
   @MaxLength(100, { message: 'La dirección no puede tener más de 100 caracteres' })
   address?: string;

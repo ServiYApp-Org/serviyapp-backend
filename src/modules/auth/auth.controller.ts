@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, UseGuards, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import express from 'express'; 
 
 @Controller('auth')
 export class AuthController {
@@ -34,8 +35,9 @@ export class AuthController {
 
   @Get('google/user/callback')
   @UseGuards(AuthGuard('google-user'))
-  async googleUserCallback(@Req() req) {
-    return this.authService.loginGoogleUser(req.user);
+  async googleUserCallback(@Req() req, @Res() res: express.Response) {
+    const result = await this.authService.handleGoogleUserRedirect(req.user);
+    return res.redirect(result.redirectUrl);
   }
 
   // === GOOGLE PROVIDER LOGIN ===
@@ -45,7 +47,8 @@ export class AuthController {
 
   @Get('google/provider/callback')
   @UseGuards(AuthGuard('google-provider'))
-  async googleProviderCallback(@Req() req) {
-    return this.authService.loginGoogleProvider(req.user);
+  async googleProviderCallback(@Req() req, @Res() res: express.Response) {
+    const result = await this.authService.handleGoogleProviderRedirect(req.user);
+    return res.redirect(result.redirectUrl);
   }
 }
