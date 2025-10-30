@@ -1,31 +1,51 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // Registro de usuario
+  // === REGISTRO / LOGIN CON EMAIL ===
   @Post('register/user')
-  async registerUser(@Body() body: any) {
+  registerUser(@Body() body: any) {
     return this.authService.registerUser(body);
   }
 
-  // Registro de proveedor
   @Post('register/provider')
-  async registerProvider(@Body() body: any) {
+  registerProvider(@Body() body: any) {
     return this.authService.registerProvider(body);
   }
 
-  // Login de usuario
   @Post('login/user')
-  async loginUser(@Body() body: { email: string; password: string }) {
+  loginUser(@Body() body: { email: string; password: string }) {
     return this.authService.loginUser(body.email, body.password);
   }
 
-  // Login de proveedor
   @Post('login/provider')
-  async loginProvider(@Body() body: { email: string; password: string }) {
+  loginProvider(@Body() body: { email: string; password: string }) {
     return this.authService.loginProvider(body.email, body.password);
+  }
+
+  // === GOOGLE USER LOGIN ===
+  @Get('google/user')
+  @UseGuards(AuthGuard('google-user'))
+  async googleUserLogin() {}
+
+  @Get('google/user/callback')
+  @UseGuards(AuthGuard('google-user'))
+  async googleUserCallback(@Req() req) {
+    return this.authService.loginGoogleUser(req.user);
+  }
+
+  // === GOOGLE PROVIDER LOGIN ===
+  @Get('google/provider')
+  @UseGuards(AuthGuard('google-provider'))
+  async googleProviderLogin() {}
+
+  @Get('google/provider/callback')
+  @UseGuards(AuthGuard('google-provider'))
+  async googleProviderCallback(@Req() req) {
+    return this.authService.loginGoogleProvider(req.user);
   }
 }

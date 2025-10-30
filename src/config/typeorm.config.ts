@@ -16,7 +16,7 @@ const config: DataSourceOptions = {
   database: process.env.DB_NAME,
 
   // Solo para desarrollo
-  dropSchema: false,
+  dropSchema: isDev,
   synchronize: isDev,
 
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],

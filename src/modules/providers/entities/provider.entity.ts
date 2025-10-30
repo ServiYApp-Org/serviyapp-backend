@@ -25,14 +25,14 @@ export class Provider {
   @Column({ type: 'varchar', length: 50 })
   surnames: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 20, })
   userName: string;
 
   @Column({ type: 'varchar', unique: true })
   email: string;
 
-  @Column({ type: 'bigint' })
-  phone: string;
+  @Column({ type: 'bigint', nullable: true })
+  phone: string | null;
 
   @Column({ type: 'varchar' })
   password: string;

@@ -14,7 +14,7 @@ export class CreateUserDto {
   names: string;
 
   @IsString({ message: 'El apellido debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'El apellido es obligatorio para el registro' })
+  // @IsNotEmpty({ message: 'El apellido es obligatorio para el registro' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/, {
     message: 'El apellido solo puede contener letras, espacios, acentos, guiones o apóstrofes',
   })
