@@ -6,6 +6,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   JoinColumn,
+  Check,
 } from 'typeorm';
 import { ServiceOrder } from 'src/modules/service-orders/entities/service-order.entity';
 import { Service } from 'src/modules/services/entities/service.entity';
@@ -14,27 +15,29 @@ import { Region } from 'src/modules/locations/entities/region.entity';
 import { City } from 'src/modules/locations/entities/city.entity';
 import { Role } from 'src/modules/auth/roles.enum';
 
+@Check(`"names" ~ '^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{2,50}$'`)
+@Check(`"surnames" ~ '^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{2,50}$'`)
 @Entity({ name: 'providers' })
 export class Provider {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 150, nullable: false, })
   names: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, nullable: true, })
   surnames: string;
 
-  @Column({ type: 'varchar', length: 20, })
+  @Column({ type: 'varchar', length: 20, unique: true })
   userName: string;
 
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'varchar', unique: true, nullable: false })
   email: string;
 
-  @Column({ type: 'bigint', nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: false, })
   password: string;
 
   // Relaciones normalizadas
@@ -50,14 +53,20 @@ export class Provider {
   @JoinColumn({ name: 'city_id' })
   city: City;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', length: 150, nullable: true, })
   address: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  profilePicture?: string;
 
   @Column({ type: 'enum', enum: Role, default: Role.Provider })
   role: Role;
 
   @Column({ default: 'pending' })
   status: string;
+
+  @Column({ default: false })
+  isCompleted: boolean;
 
   @CreateDateColumn({ type: 'timestamp' })
   registrationDate: Date;

@@ -17,27 +17,29 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: false, })
+  @Column({ type: 'varchar', length: 150, nullable: false })
   names: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true, })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   surnames: string;
 
-  @Column({ type: 'varchar', unique: true, nullable: false, })
+  @Column({ type: 'varchar', unique: true, nullable: false })
   email: string;
 
-  @Column({ type: 'varchar', nullable: false, })
+  @Column({ type: 'varchar', nullable: false })
   password: string;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string;
-
 
   @Column({ type: 'enum', enum: Role, default: Role.User })
   role: Role;
 
   @Column({ type: 'varchar', default: 'active' })
   status: string;
+
+  @Column({ default: false })
+  isCompleted: boolean;
 
   @Column({ type: 'varchar', nullable: true })
   profilePicture: string;

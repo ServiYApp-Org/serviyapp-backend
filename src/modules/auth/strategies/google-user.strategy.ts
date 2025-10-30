@@ -15,7 +15,7 @@ export class GoogleUserStrategy extends PassportStrategy(Strategy, 'google-user'
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
-    console.log('✅ VALIDANDO USUARIO GOOGLE...', profile);
+    console.log('VALIDANDO USUARIO GOOGLE...', profile);
 
     try {
       const { name, emails, photos } = profile;
@@ -30,7 +30,7 @@ export class GoogleUserStrategy extends PassportStrategy(Strategy, 'google-user'
       const user = await this.authService.validateOrCreateGoogleUser(userData);
       done(null, user);
     } catch (error) {
-      console.error('❌ ERROR EN VALIDATE GOOGLE:', error);
+      console.error('ERROR EN VALIDATE GOOGLE:', error);
       done(error, null);
     }
   }
