@@ -1,30 +1,43 @@
 import { registerAs } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { config as dotenvConfig } from 'dotenv';
+import * as dotenv from 'dotenv';
 
-// Carga el archivo .env (puedes cambiarlo si usas .development.env)
-dotenvConfig({ path: '.development.env' });
+// 🧭 Detectar entorno ANTES de cargar dotenv
+const nodeEnv = process.env.NODE_ENV?.trim() || 'development';
+const isProduction = nodeEnv === 'production';
 
-const isDev = process.env.NODE_ENV !== 'production';
+// 🧩 Determinar archivo a cargar
+const envFilePath = isProduction ? '.production.env' : '.development.env';
 
-const config: DataSourceOptions = {
-  type: 'postgres',
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+// 🧰 Forzar carga del archivo correcto (y sobrescribir lo previo)
+dotenv.config({ path: envFilePath, override: true });
 
-  // Solo para desarrollo
-  dropSchema: false,
-  synchronize: isDev,
+console.log(`🧭 Entorno actual: ${nodeEnv}`);
+console.log(`📄 Cargando archivo env: ${envFilePath}`);
 
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-  logging: isDev,
-};
+const config: DataSourceOptions = isProduction
+  ? {
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      synchronize: false,
+      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+      migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+      logging: false,
+    }
+  : {
+      type: 'postgres',
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
+      username: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || '1234',
+      database: process.env.DB_NAME || 'serviyapp',
+      synchronize: true,
+      ssl: false,
+      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+      migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+      logging: true,
+    };
 
 export default registerAs('typeorm', () => config);
-
-// Para CLI (typeorm migration:run, etc.)
 export const connectionSource = new DataSource(config);
