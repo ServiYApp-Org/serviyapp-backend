@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
 import { Provider } from 'src/modules/providers/entities/provider.entity';
@@ -31,11 +32,11 @@ export class Service {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @ManyToOne(() => Provider, (provider) => provider.services, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Provider, (provider) => provider.services)
+  @JoinColumn({ name: 'providerId' })
   provider: Provider;
 
   @ManyToOne(() => Category, (category) => category.services)
+  @JoinColumn({ name: 'categoryId' })
   category: Category;
 }
