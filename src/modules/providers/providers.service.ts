@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Provider } from './entities/provider.entity';
 
+// Servicio encargado de la lógica de negocio de los proveedores.
+// Gestiona la creación, consulta, actualización y eliminación de registros.
 @Injectable()
 export class ProvidersService {
   constructor(
@@ -10,7 +12,7 @@ export class ProvidersService {
     private readonly providerRepository: Repository<Provider>,
   ) {}
 
-  // Buscar proveedor por correo
+  // Buscar proveedor por correo electrónico.
   async findByEmail(email: string): Promise<Provider | null> {
     if (!email) return null;
     return this.providerRepository.findOne({
@@ -18,28 +20,27 @@ export class ProvidersService {
     });
   }
 
-  
-  // Crear proveedor (usado por AuthService)
+  // Crear un nuevo proveedor (utilizado por AuthService).
   async create(data: Partial<Provider>): Promise<Provider> {
     const newProvider = this.providerRepository.create(data);
     return this.providerRepository.save(newProvider);
   }
 
-  // Obtener todos los proveedores
+  // Obtener todos los proveedores registrados.
   async findAll(): Promise<Provider[]> {
     return this.providerRepository.find({
       order: { registrationDate: 'DESC' },
-      relations: ['country', 'region', 'city'], // si tus entidades están relacionadas
+      relations: ['country', 'region', 'city'],
     });
   }
 
+  // Buscar proveedor por nombre de usuario.
   async findByUsername(userName: string): Promise<Provider | null> {
     if (!userName) return null;
     return this.providerRepository.findOne({ where: { userName } });
   }
 
-
-  // Obtener proveedor por ID
+  // Obtener un proveedor por ID.
   async findOne(id: string): Promise<Provider> {
     const provider = await this.providerRepository.findOne({
       where: { id },
@@ -49,17 +50,16 @@ export class ProvidersService {
     return provider;
   }
 
-  // Actualizar proveedor
+  // Actualizar la información de un proveedor.
   async update(id: string, data: Partial<Provider>): Promise<Provider> {
     const provider = await this.findOne(id);
     Object.assign(provider, data);
     return await this.providerRepository.save(provider);
   }
 
-  // Eliminar proveedor
+  // Eliminar un proveedor existente.
   async remove(id: string): Promise<void> {
     const provider = await this.findOne(id);
     await this.providerRepository.remove(provider);
   }
 }
-

@@ -11,8 +11,9 @@ import {
 import { IsUnique } from 'src/modules/common/validators/is-unique.validator';
 import { Provider } from '../entities/provider.entity';
 
+// DTO para la creación de un nuevo proveedor.
+// Valida los datos ingresados antes de registrar en la base de datos.
 export class CreateProviderDto {
-
   @IsString({ message: 'El nombre debe ser una cadena de texto' })
   @IsNotEmpty({ message: 'El nombre es obligatorio para el registro' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/, {

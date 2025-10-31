@@ -9,7 +9,10 @@ import {
 } from 'typeorm';
 import { ServiceOrder } from 'src/modules/service-orders/entities/service-order.entity';
 import { Role } from 'src/modules/auth/roles.enum';
+import { Address } from 'src/modules/addresses/entities/address.entity';
 
+// Entidad que representa a los usuarios del sistema.
+// Contiene datos personales, de autenticación y relaciones con pedidos y direcciones.
 @Check(`"names" ~ '^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{2,50}$'`)
 @Check(`"surnames" ~ '^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{2,50}$'`)
 @Entity({ name: 'users' })
@@ -49,4 +52,7 @@ export class User {
 
   @OneToMany(() => ServiceOrder, (order) => order.user)
   orders: ServiceOrder[];
+
+  @OneToMany(() => Address, (address) => address.user)
+  addresses: Address[];
 }

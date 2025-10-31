@@ -7,6 +7,8 @@ import { City } from '../entities/city.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Servicio encargado de la precarga de datos de ubicación (seed).
+// Inserta países, regiones y ciudades desde un archivo JSON al iniciar el módulo.
 @Injectable()
 export class LocationsSeed implements OnModuleInit {
   constructor(
@@ -21,7 +23,7 @@ export class LocationsSeed implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    // Solo ejecuta en desarrollo
+    // Se ejecuta solo en entornos de desarrollo.
     if (process.env.NODE_ENV === 'production') {
       console.log('[LocationsSeed] Entorno de producción, se omite precarga de ubicaciones.');
       return;
@@ -50,6 +52,7 @@ export class LocationsSeed implements OnModuleInit {
       const country = this.countryRepo.create({
         name: countryData.name,
         code: countryData.code,
+        lada: countryData.lada,
       });
       await this.countryRepo.save(country);
 

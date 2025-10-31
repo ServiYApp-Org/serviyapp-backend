@@ -16,19 +16,21 @@ import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { Roles } from 'src/modules/auth/decorators/roles.decorator';
 import { Role } from 'src/modules/auth/roles.enum';
 
+// Controlador encargado de la gestión de proveedores.
+// Permite listar, consultar, actualizar y eliminar registros.
 @Controller('providers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
 
-  // LISTAR TODOS LOS PROVEEDORES
+  // Listar todos los proveedores (solo administrador).
   @Get()
   @Roles(Role.Admin)
   findAll() {
     return this.providersService.findAll();
   }
 
-  // VER UN PROVEEDOR 
+  // Obtener un proveedor por ID (acceso restringido a su propio perfil o administrador).
   @Get(':id')
   @Roles(Role.Admin, Role.Provider)
   async findOne(@Param('id') id: string, @Req() req) {
@@ -39,7 +41,8 @@ export class ProvidersController {
     return this.providersService.findOne(id);
   }
 
-  // ACTUALIZAR PERFIL GENERAL
+  // Actualizar perfil general del proveedor.
+  // Solo el propio proveedor o el administrador pueden modificarlo.
   @Patch(':id')
   @Roles(Role.Admin, Role.Provider)
   async update(@Param('id') id: string, @Body() dto: UpdateProviderDto, @Req() req) {
@@ -47,7 +50,7 @@ export class ProvidersController {
     if (user.role !== Role.Admin && user.id !== id)
       throw new ForbiddenException('No tienes permiso para modificar este perfil');
 
-    // Filtramos campos sensibles e internos
+    // Filtra campos sensibles e internos.
     const { email, role, isCompleted, ...safeData } = dto as any;
 
     const updatedProvider = await this.providersService.update(id, safeData);
@@ -57,7 +60,8 @@ export class ProvidersController {
     };
   }
 
-  // COMPLETAR REGISTRO DESPUÉS DE LOGIN CON GOOGLE
+  // Completar registro tras autenticación con Google.
+  // Permite agregar los datos faltantes y marcar el perfil como completo.
   @Patch('complete/:id')
   @Roles(Role.Provider, Role.Admin)
   async completeProviderProfile(
@@ -73,7 +77,7 @@ export class ProvidersController {
 
     const updatedProvider = await this.providersService.update(id, {
       ...safeData,
-      isCompleted: true, // el backend lo fuerza
+      isCompleted: true,
     });
 
     return {
@@ -82,7 +86,7 @@ export class ProvidersController {
     };
   }
 
-  // === ELIMINAR PROVEEDOR ===
+  // Eliminar un proveedor (solo administrador).
   @Delete(':id')
   @Roles(Role.Admin)
   remove(@Param('id') id: string) {

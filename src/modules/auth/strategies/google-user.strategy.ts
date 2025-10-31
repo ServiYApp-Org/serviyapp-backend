@@ -3,6 +3,7 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { Injectable } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 
+// Estrategia de autenticación para usuarios mediante Google OAuth 2.0.
 @Injectable()
 export class GoogleUserStrategy extends PassportStrategy(Strategy, 'google-user') {
   constructor(private authService: AuthService) {
@@ -14,11 +15,18 @@ export class GoogleUserStrategy extends PassportStrategy(Strategy, 'google-user'
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
+  // Valida o crea un usuario después de autenticarse con Google.
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: VerifyCallback,
+  ): Promise<any> {
     console.log('VALIDANDO USUARIO GOOGLE...', profile);
 
     try {
       const { name, emails, photos } = profile;
+
       const userData = {
         names: name?.givenName,
         surnames: name?.familyName,

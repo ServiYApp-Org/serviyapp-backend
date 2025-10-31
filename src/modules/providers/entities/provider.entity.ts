@@ -15,6 +15,8 @@ import { Region } from 'src/modules/locations/entities/region.entity';
 import { City } from 'src/modules/locations/entities/city.entity';
 import { Role } from 'src/modules/auth/roles.enum';
 
+// Entidad que representa a los proveedores registrados en el sistema.
+// Incluye datos personales, de ubicación, estado y relaciones con servicios y órdenes.
 @Check(`"names" ~ '^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{2,50}$'`)
 @Check(`"surnames" ~ '^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{2,50}$'`)
 @Entity({ name: 'providers' })
@@ -22,10 +24,10 @@ export class Provider {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 150, nullable: false, })
+  @Column({ type: 'varchar', length: 150, nullable: false })
   names: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true, })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   surnames: string;
 
   @Column({ type: 'varchar', length: 20, unique: true })
@@ -37,10 +39,10 @@ export class Provider {
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
 
-  @Column({ type: 'varchar', nullable: false, })
+  @Column({ type: 'varchar', nullable: false })
   password: string;
 
-  // Relaciones normalizadas
+  // Relaciones con entidades de ubicación
   @ManyToOne(() => Country, { eager: true, nullable: true })
   @JoinColumn({ name: 'country_id' })
   country: Country;
@@ -53,7 +55,7 @@ export class Provider {
   @JoinColumn({ name: 'city_id' })
   city: City;
 
-  @Column({ type: 'varchar', length: 150, nullable: true, })
+  @Column({ type: 'varchar', length: 150, nullable: true })
   address: string;
 
   @Column({ type: 'varchar', nullable: true })

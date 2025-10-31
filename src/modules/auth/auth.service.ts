@@ -5,6 +5,8 @@ import { UsersService } from 'src/modules/users/users.service';
 import { ProvidersService } from 'src/modules/providers/providers.service';
 import { Role } from './roles.enum';
 
+// Servicio principal de autenticación.
+// Maneja registro, login y autenticación con Google para usuarios y proveedores.
 @Injectable()
 export class AuthService {
   constructor(
@@ -13,8 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-
-  // REGISTRO DE USUARIO
+  // Registra un nuevo usuario.
   async registerUser(data: any) {
     const email = data.email.trim().toLowerCase();
     const existing = await this.usersService.findByEmail(email);
@@ -46,7 +47,7 @@ export class AuthService {
     };
   }
 
-  // REGISTRO DE PROVEEDOR
+  // Registra un nuevo proveedor.
   async registerProvider(data: any) {
     const email = data.email.trim().toLowerCase();
     const existing = await this.providersService.findByEmail(email);
@@ -94,8 +95,7 @@ export class AuthService {
     };
   }
 
-
-  // LOGIN USUARIO
+  // Login de usuario con email y contraseña.
   async loginUser(email: string, password: string) {
     email = email.trim().toLowerCase();
     const user = await this.usersService.findByEmail(email);
@@ -111,8 +111,7 @@ export class AuthService {
     };
   }
 
-
-  // LOGIN PROVEEDOR
+  // Login de proveedor con email y contraseña.
   async loginProvider(email: string, password: string) {
     email = email.trim().toLowerCase();
     const provider = await this.providersService.findByEmail(email);
@@ -128,7 +127,7 @@ export class AuthService {
     };
   }
 
-  // GOOGLE LOGIN / REGISTRO DE USUARIO
+  // Valida o crea un usuario autenticado con Google.
   async validateOrCreateGoogleUser(userData) {
     const email = userData.email.trim().toLowerCase();
     let user = await this.usersService.findByEmail(email);
@@ -151,6 +150,7 @@ export class AuthService {
     return user;
   }
 
+  // Login de usuario autenticado con Google.
   async loginGoogleUser(user) {
     const payload = { id: user.id, email: user.email, role: user.role };
     return {
@@ -159,8 +159,7 @@ export class AuthService {
     };
   }
 
-
-  // GOOGLE LOGIN / REGISTRO DE PROVEEDOR
+  // Valida o crea un proveedor autenticado con Google.
   async validateOrCreateGoogleProvider(providerData) {
     const email = providerData.email.trim().toLowerCase();
 
@@ -195,6 +194,7 @@ export class AuthService {
     return provider;
   }
 
+  // Login de proveedor autenticado con Google.
   async loginGoogleProvider(provider) {
     const payload = { id: provider.id, email: provider.email, role: provider.role };
     return {
@@ -203,8 +203,7 @@ export class AuthService {
     };
   }
 
-
-  // REDIRECCIONES GOOGLE
+  // Redirección tras autenticación con Google (usuario).
   async handleGoogleUserRedirect(user: any) {
     const payload = { id: user.id, email: user.email, role: user.role };
     const token = this.jwtService.sign(payload, { expiresIn: '1d' });
@@ -217,6 +216,7 @@ export class AuthService {
     return { redirectUrl };
   }
 
+  // Redirección tras autenticación con Google (proveedor).
   async handleGoogleProviderRedirect(provider: any) {
     const payload = { id: provider.id, email: provider.email, role: provider.role };
     const token = this.jwtService.sign(payload, { expiresIn: '1d' });
