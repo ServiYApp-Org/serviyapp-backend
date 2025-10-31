@@ -10,6 +10,8 @@ import {
 import { IsUnique } from 'src/modules/common/validators/is-unique.validator';
 import { User } from '../entities/user.entity';
 
+// DTO para la creación de un nuevo usuario.
+// Valida los datos de registro antes de almacenarlos en la base de datos.
 export class CreateUserDto {
   @IsString({ message: 'El nombre debe ser una cadena de texto' })
   @IsNotEmpty({ message: 'El nombre es obligatorio para el registro' })

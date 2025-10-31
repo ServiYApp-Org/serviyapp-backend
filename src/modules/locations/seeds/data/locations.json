@@ -2,6 +2,7 @@
   {
     "name": "Argentina",
     "code": "AR",
+    "lada": "+54",
     "regions": [
       {
         "name": "Autonomous City of Buenos Aires",
@@ -1264,6 +1265,7 @@
   {
     "name": "Colombia",
     "code": "CO",
+    "lada": "+57",
     "regions": [
       {
         "name": "Amazonas",
@@ -2557,6 +2559,7 @@
   {
     "name": "Mexico",
     "code": "MX",
+    "lada": "+52",
     "regions": [
       {
         "name": "Aguascalientes",

@@ -16,26 +16,29 @@ import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { Roles } from 'src/modules/auth/decorators/roles.decorator';
 import { Role } from 'src/modules/auth/roles.enum';
 
+// Controlador encargado de la gestión de usuarios.
+// Permite listar, consultar, actualizar y eliminar perfiles.
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // LISTAR TODOS LOS USUARIOS
+  // Listar todos los usuarios (solo administrador).
   @Get()
   @Roles(Role.Admin)
   findAll() {
     return this.usersService.findAll();
   }
 
-  // VER UN USUARIO
+  // Obtener un usuario por ID (solo administrador).
   @Get(':id')
   @Roles(Role.Admin)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
-  // ACTUALIZAR PERFIL GENERAL
+  // Actualizar perfil general del usuario.
+  // Solo el propio usuario o un administrador pueden modificarlo.
   @Patch(':id')
   @Roles(Role.Admin, Role.User)
   async update(
@@ -47,7 +50,7 @@ export class UsersController {
     if (user.role !== Role.Admin && user.id !== id)
       throw new ForbiddenException('No tienes permiso para modificar este perfil');
 
-    // Filtramos manualmente (aunque no existan en el DTO)
+    // Filtramos manualmente campos sensibles.
     const { email, role, isCompleted, ...safeData } = dto as any;
 
     const updatedUser = await this.usersService.update(id, safeData);
@@ -57,7 +60,8 @@ export class UsersController {
     };
   }
 
-  // COMPLETAR REGISTRO DESPUÉS DE GOOGLE LOGIN 
+  // Completar registro tras autenticación con Google.
+  // Permite completar datos faltantes y marcar el perfil como completo.
   @Patch('complete/:id')
   @Roles(Role.User, Role.Admin)
   async completeProfile(
@@ -73,7 +77,7 @@ export class UsersController {
 
     const updatedUser = await this.usersService.update(id, {
       ...safeData,
-      isCompleted: true, // el backend lo fuerza
+      isCompleted: true,
     });
 
     return {
@@ -82,8 +86,7 @@ export class UsersController {
     };
   }
 
-
-  // ELIMINAR USUARIO 
+  // Eliminar un usuario (solo administrador).
   @Delete(':id')
   @Roles(Role.Admin)
   remove(@Param('id') id: string) {

@@ -5,6 +5,8 @@ import { Country } from './entities/country.entity';
 import { Region } from './entities/region.entity';
 import { City } from './entities/city.entity';
 
+// Servicio encargado de la gestión de ubicaciones.
+// Permite consultar países, regiones y ciudades desde la base de datos.
 @Injectable()
 export class LocationsService {
   constructor(
@@ -61,3 +63,4 @@ export class LocationsService {
     });
   }
 }
+

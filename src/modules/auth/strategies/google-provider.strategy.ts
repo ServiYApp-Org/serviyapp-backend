@@ -3,6 +3,7 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { Injectable } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 
+// Estrategia de autenticación para proveedores mediante Google OAuth 2.0.
 @Injectable()
 export class GoogleProviderStrategy extends PassportStrategy(Strategy, 'google-provider') {
   constructor(private authService: AuthService) {
@@ -14,8 +15,15 @@ export class GoogleProviderStrategy extends PassportStrategy(Strategy, 'google-p
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
+  // Valida o crea un proveedor después de autenticarse con Google.
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: VerifyCallback,
+  ): Promise<any> {
     const { name, emails, photos } = profile;
+
     const providerData = {
       names: name?.givenName,
       surnames: name?.familyName,
@@ -23,6 +31,7 @@ export class GoogleProviderStrategy extends PassportStrategy(Strategy, 'google-p
       profilePicture: photos[0].value,
       role: 'provider',
     };
+
     const provider = await this.authService.validateOrCreateGoogleProvider(providerData);
     done(null, provider);
   }

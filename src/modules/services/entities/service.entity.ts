@@ -9,6 +9,8 @@ import {
 import { Provider } from 'src/modules/providers/entities/provider.entity';
 import { Category } from 'src/modules/categories/entities/category.entity';
 
+// Entidad que representa los servicios ofrecidos por los proveedores.
+// Incluye información básica, relación con el proveedor y su categoría.
 @Entity({ name: 'services' })
 export class Service {
   @PrimaryGeneratedColumn('uuid')
