@@ -2,21 +2,52 @@ import { Controller, Post, Body, Get, Req, UseGuards, Res } from '@nestjs/common
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 // Controlador de autenticación.
 // Maneja registro, login y autenticación con Google para usuarios y proveedores.
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // Registra un nuevo usuario con email y contraseña.
   @Post('register/user')
+  @ApiBody({
+    description: 'Crear usuario',
+    schema: {
+      example: {
+        names: 'Juan',
+        surnames: 'Pérez',
+        email: 'juan.perez@example.com',
+        password: 'Password123!',
+        phone: '3412345678'
+      }
+    }
+  })
   registerUser(@Body() body: any) {
     return this.authService.registerUser(body);
   }
 
   // Registra un nuevo proveedor con email y contraseña.
   @Post('register/provider')
+  @ApiBody({
+    description: 'Crear proveedor',
+    schema: {
+      example: {
+        names: 'Nombres',
+        surnames: 'Apellidos',
+        userName: 'proveedor123',
+        email: 'proveedor@proveedor.com',
+        password: 'Proveedor123!',
+        phone: '1234567890',
+        country: 'Colombia',
+        region: 'Santa Fe',
+        city: 'Rosario',
+        address: 'Direccion 123'
+      }
+    }
+  })
   registerProvider(@Body() body: any) {
     return this.authService.registerProvider(body);
   }

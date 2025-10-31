@@ -15,6 +15,7 @@ import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { Roles } from 'src/modules/auth/decorators/roles.decorator';
 import { Role } from 'src/modules/auth/roles.enum';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 // Controlador encargado de la gestión de proveedores.
 // Permite listar, consultar, actualizar y eliminar registros.
@@ -24,6 +25,7 @@ export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
 
   // Listar todos los proveedores (solo administrador).
+  @ApiBearerAuth()
   @Get()
   @Roles(Role.Admin)
   findAll() {
@@ -31,6 +33,7 @@ export class ProvidersController {
   }
 
   // Obtener un proveedor por ID (acceso restringido a su propio perfil o administrador).
+  @ApiBearerAuth()
   @Get(':id')
   @Roles(Role.Admin, Role.Provider)
   async findOne(@Param('id') id: string, @Req() req) {
@@ -43,6 +46,7 @@ export class ProvidersController {
 
   // Actualizar perfil general del proveedor.
   // Solo el propio proveedor o el administrador pueden modificarlo.
+  @ApiBearerAuth()
   @Patch(':id')
   @Roles(Role.Admin, Role.Provider)
   async update(@Param('id') id: string, @Body() dto: UpdateProviderDto, @Req() req) {
@@ -62,6 +66,7 @@ export class ProvidersController {
 
   // Completar registro tras autenticación con Google.
   // Permite agregar los datos faltantes y marcar el perfil como completo.
+  @ApiBearerAuth()
   @Patch('complete/:id')
   @Roles(Role.Provider, Role.Admin)
   async completeProviderProfile(
@@ -87,6 +92,7 @@ export class ProvidersController {
   }
 
   // Eliminar un proveedor (solo administrador).
+  @ApiBearerAuth()
   @Delete(':id')
   @Roles(Role.Admin)
   remove(@Param('id') id: string) {

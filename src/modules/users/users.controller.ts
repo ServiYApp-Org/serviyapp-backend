@@ -15,6 +15,7 @@ import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { Roles } from 'src/modules/auth/decorators/roles.decorator';
 import { Role } from 'src/modules/auth/roles.enum';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 // Controlador encargado de la gestión de usuarios.
 // Permite listar, consultar, actualizar y eliminar perfiles.
@@ -24,6 +25,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // Listar todos los usuarios (solo administrador).
+  @ApiBearerAuth()
   @Get()
   @Roles(Role.Admin)
   findAll() {
@@ -31,6 +33,7 @@ export class UsersController {
   }
 
   // Obtener un usuario por ID (solo administrador).
+  @ApiBearerAuth()
   @Get(':id')
   @Roles(Role.Admin)
   findOne(@Param('id') id: string) {
@@ -39,6 +42,7 @@ export class UsersController {
 
   // Actualizar perfil general del usuario.
   // Solo el propio usuario o un administrador pueden modificarlo.
+  @ApiBearerAuth()
   @Patch(':id')
   @Roles(Role.Admin, Role.User)
   async update(
@@ -62,6 +66,7 @@ export class UsersController {
 
   // Completar registro tras autenticación con Google.
   // Permite completar datos faltantes y marcar el perfil como completo.
+  @ApiBearerAuth()
   @Patch('complete/:id')
   @Roles(Role.User, Role.Admin)
   async completeProfile(
@@ -87,6 +92,7 @@ export class UsersController {
   }
 
   // Eliminar un usuario (solo administrador).
+  @ApiBearerAuth()
   @Delete(':id')
   @Roles(Role.Admin)
   remove(@Param('id') id: string) {
