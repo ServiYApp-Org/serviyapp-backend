@@ -14,6 +14,7 @@ import { Country } from 'src/modules/locations/entities/country.entity';
 import { Region } from 'src/modules/locations/entities/region.entity';
 import { City } from 'src/modules/locations/entities/city.entity';
 import { Role } from 'src/modules/auth/roles.enum';
+import { ProviderStatus } from '../enums/provider-status.enum';
 
 // Entidad que representa a los proveedores registrados en el sistema.
 // Incluye datos personales, de ubicación, estado y relaciones con servicios y órdenes.
@@ -64,8 +65,8 @@ export class Provider {
   @Column({ type: 'enum', enum: Role, default: Role.Provider })
   role: Role;
 
-  @Column({ default: 'pending' })
-  status: string;
+  @Column({   type: 'enum', enum: ProviderStatus, default: ProviderStatus.PENDING, })
+  status: ProviderStatus;
 
   @Column({ default: false })
   isCompleted: boolean;

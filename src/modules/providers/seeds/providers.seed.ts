@@ -12,6 +12,9 @@ import { Country } from 'src/modules/locations/entities/country.entity';
 import { Region } from 'src/modules/locations/entities/region.entity';
 import { City } from 'src/modules/locations/entities/city.entity';
 import { Role } from 'src/modules/auth/roles.enum';
+import { ProviderStatus } from '../enums/provider-status.enum';
+import { DocumentStatus } from '../enums/document-status.enum';
+import { ScheduleStatus } from '../enums/schedule-status.enum';
 
 // Servicio de precarga (seed) para proveedores.
 // Crea registros iniciales de proveedores, documentos y horarios a partir de un archivo JSON.
@@ -91,7 +94,7 @@ export class ProvidersSeed implements OnModuleInit {
         address: p.address,
         profilePicture: p.profilePicture ?? null,
         role: Role.Provider,
-        status: 'active',
+        status: ProviderStatus.ACTIVE,
         isCompleted: true,
         registrationDate: new Date(),
         country: randomCountry,
@@ -108,7 +111,7 @@ export class ProvidersSeed implements OnModuleInit {
         documentNumber: p.documentNumber ?? '123456789',
         file: p.documentFile ?? 'https://example.com/doc.pdf',
         date: new Date(),
-        status: 'approved',
+        status: DocumentStatus.APPROVED,
         description: 'Documento de identidad',
         accountType: 'Savings',
         accountNumber: '000111222',
@@ -125,7 +128,7 @@ export class ProvidersSeed implements OnModuleInit {
           day: d,
           startTime: '09:00',
           endTime: '18:00',
-          status: 'active',
+          status: ScheduleStatus.ACTIVE,
           provider: savedProvider,
         }),
       );

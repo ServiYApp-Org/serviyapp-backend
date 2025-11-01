@@ -7,6 +7,7 @@ import { Provider } from 'src/modules/providers/entities/provider.entity';
 import { Schedule } from 'src/modules/providers/entities/schedule.entity';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ScheduleStatus } from 'src/modules/providers/enums/schedule-status.enum';
 
 // Servicio de precarga (seed) para los servicios.
 // Genera registros iniciales de servicios y horarios asociados a los proveedores.
@@ -62,7 +63,7 @@ export class ServicesSeed implements OnModuleInit {
           day,
           startTime: `${startHour.toString().padStart(2, '0')}:00`,
           endTime: `${endHour.toString().padStart(2, '0')}:00`,
-          status: 'active',
+          status: ScheduleStatus.ACTIVE,
           provider,
         });
 

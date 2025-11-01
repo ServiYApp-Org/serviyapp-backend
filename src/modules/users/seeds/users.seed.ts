@@ -10,6 +10,9 @@ import { Role } from '../../auth/roles.enum';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as bcrypt from 'bcrypt';
+import { UserStatus } from '../enums/user-status.enum';
+
+
 
 // Servicio de precarga (seed) para usuarios.
 // Crea usuarios iniciales, direcciones y un administrador por defecto.
@@ -72,6 +75,13 @@ export class UsersSeed {
       const cities = await this.cityRepo.find({ where: { region: { id: randomRegion.id } } });
       const randomCity = cities[Math.floor(Math.random() * cities.length)];
 
+      const normalizedRole = (u.role || '').toLowerCase();
+      const userRole =
+        Object.values(Role).includes(normalizedRole as Role)
+          ? (normalizedRole as Role)
+          : Role.User;
+
+
       // Crear usuario.
       const user = this.userRepo.create({
         names: u.names,
@@ -79,13 +89,12 @@ export class UsersSeed {
         email: u.email,
         password: await bcrypt.hash(u.password, 10),
         phone: String(u.phone),
-        role: Role.User,
-        status: 'active',
+        role: userRole,              
+        status: UserStatus.ACTIVE,    
         isCompleted: true,
         registrationDate: new Date(),
       });
 
-      const savedUser = await this.userRepo.save(user);
 
       // Crear dirección asociada.
       const address = this.addressRepo.create({
@@ -98,7 +107,7 @@ export class UsersSeed {
         country: randomCountry,
         region: randomRegion,
         city: randomCity,
-        user: savedUser,
+        user: await this.userRepo.save(user),
       });
 
       await this.addressRepo.save(address);
@@ -138,7 +147,7 @@ export class UsersSeed {
       password: await bcrypt.hash('admin123', 10),
       phone: '+573001112233',
       role: Role.Admin,
-      status: 'active',
+      status: UserStatus.ACTIVE,
       isCompleted: true,
       registrationDate: new Date(),
     });

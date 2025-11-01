@@ -27,7 +27,7 @@ import { LocationsModule } from './modules/locations/locations.module';
       useFactory: (configService: ConfigService) => {
         const config = configService.get('typeorm');
         if (!config) {
-          throw new Error('❌ No se pudo cargar la configuración de TypeORM');
+          throw new Error('No se pudo cargar la configuración de TypeORM');
         }
         return config;
       },
@@ -36,10 +36,11 @@ import { LocationsModule } from './modules/locations/locations.module';
     AuthModule,
     UsersModule,
     ProvidersModule,
-    ServicesModule,
     CategoriesModule,
-    ServiceOrdersModule,
     LocationsModule, 
+    ServicesModule,
+    ServiceOrdersModule,
+
   ],
   controllers: [AppController],
   providers: [AppService],
