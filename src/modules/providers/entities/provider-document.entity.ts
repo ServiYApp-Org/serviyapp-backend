@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Provider } from './provider.entity';
+import { DocumentStatus } from '../enums/document-status.enum';
 
 // Entidad que representa los documentos asociados a un proveedor.
 // Incluye datos de identificación, soporte bancario y verificación.
@@ -31,8 +32,8 @@ export class ProviderDocument {
   @CreateDateColumn({ type: 'timestamp' })
   date: Date;
 
-  @Column({ type: 'varchar', length: 30, default: 'pending' })
-  status: string; // pending | approved | rejected
+  @Column({ type: 'enum', enum: DocumentStatus })
+  status: DocumentStatus;
 
   @Column({ type: 'text', nullable: true })
   description: string;

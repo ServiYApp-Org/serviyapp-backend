@@ -21,7 +21,7 @@ import { GoogleUserStrategy } from './strategies/google-user.strategy';
     // Usa la clave secreta definida en las variables de entorno.
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '7d' }, // Duración del token: 7 días.
+      signOptions: { expiresIn: '30m' }, // Duración del token: 7 días.
     }),
 
     // Módulos de usuarios y proveedores, necesarios para las operaciones de autenticación.

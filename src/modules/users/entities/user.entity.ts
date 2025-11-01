@@ -10,6 +10,8 @@ import {
 import { ServiceOrder } from 'src/modules/service-orders/entities/service-order.entity';
 import { Role } from 'src/modules/auth/roles.enum';
 import { Address } from 'src/modules/addresses/entities/address.entity';
+import { UserStatus } from '../enums/user-status.enum';
+
 
 // Entidad que representa a los usuarios del sistema.
 // Contiene datos personales, de autenticación y relaciones con pedidos y direcciones.
@@ -38,8 +40,8 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.User })
   role: Role;
 
-  @Column({ type: 'varchar', default: 'active' })
-  status: string;
+  @Column({   type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE, })
+  status: UserStatus;
 
   @Column({ default: false })
   isCompleted: boolean;

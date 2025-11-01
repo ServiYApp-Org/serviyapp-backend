@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../roles.enum';
 
@@ -16,6 +16,29 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) return true;
 
     const { user } = context.switchToHttp().getRequest();
-    return requiredRoles.includes(user.role);
+
+    // Si no hay usuario autenticado, denegamos directamente
+    if (!user) {
+      throw new ForbiddenException('Acceso denegado: no se encontró un usuario autenticado.');
+    }
+
+    // Verificamos si el rol del usuario coincide con alguno de los requeridos
+    const hasRole = requiredRoles.includes(user.role);
+
+    if (!hasRole) {
+      // Mensaje personalizado según quién intenta acceder
+      const customMessage =
+        user.role === Role.User
+          ? 'Solo los administradores pueden acceder a este recurso.'
+          : `Tu rol (${user.role}) no tiene permiso para esta acción.`;
+
+      throw new ForbiddenException({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: customMessage,
+      });
+    }
+
+    return true;
   }
 }

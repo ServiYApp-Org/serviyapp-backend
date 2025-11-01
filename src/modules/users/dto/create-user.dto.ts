@@ -6,9 +6,11 @@ import {
   IsNotEmpty,
   MinLength,
   MaxLength,
+  IsEnum,
 } from 'class-validator';
 import { IsUnique } from 'src/modules/common/validators/is-unique.validator';
 import { User } from '../entities/user.entity';
+import { Role } from 'src/modules/auth/roles.enum';
 
 // DTO para la creación de un nuevo usuario.
 // Valida los datos de registro antes de almacenarlos en la base de datos.
@@ -50,4 +52,8 @@ export class CreateUserDto {
   @MinLength(8, { message: 'El número de teléfono debe tener al menos 8 dígitos' })
   @MaxLength(20, { message: 'El número de teléfono no puede tener más de 20 dígitos' })
   phone?: string;
+
+  @IsOptional()
+  @IsEnum(Role, { message: 'El rol debe ser un valor válido' })
+  role?: Role;
 }
