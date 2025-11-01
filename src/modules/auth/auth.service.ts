@@ -1,12 +1,15 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/modules/users/users.service';
 import { ProvidersService } from 'src/modules/providers/providers.service';
 import { Role } from './roles.enum';
+import { ProviderStatus } from '../providers/enums/provider-status.enum';
 
-// Servicio principal de autenticación.
-// Maneja registro, login y autenticación con Google para usuarios y proveedores.
 @Injectable()
 export class AuthService {
   constructor(
@@ -15,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // Registra un nuevo usuario.
+  // Registro de usuario
   async registerUser(data: any) {
     const email = data.email.trim().toLowerCase();
     const existing = await this.usersService.findByEmail(email);
@@ -31,7 +34,7 @@ export class AuthService {
     });
 
     const payload = { id: newUser.id, email: newUser.email, role: newUser.role };
-    const token = this.jwtService.sign(payload, { expiresIn: '1d' });
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
     return {
       message: 'Usuario registrado correctamente',
@@ -47,7 +50,7 @@ export class AuthService {
     };
   }
 
-  // Registra un nuevo proveedor.
+  // Registro de proveedor (con validación de país, región, ciudad)
   async registerProvider(data: any) {
     const email = data.email.trim().toLowerCase();
     const existing = await this.providersService.findByEmail(email);
@@ -62,17 +65,15 @@ export class AuthService {
       email,
       phone: data.phone,
       password: hashedPassword,
-      country: data.country || 'Colombia',
-      region: data.region,
-      city: data.city,
+      countryId: data.country,
+      regionId: data.region,
+      cityId: data.city,
       address: data.address || data.Address || data.Adreess,
       role: Role.Provider,
-      status: 'pending',
-      registrationDate: new Date(),
     });
 
     const payload = { id: newProvider.id, email: newProvider.email, role: newProvider.role };
-    const token = this.jwtService.sign(payload, { expiresIn: '1d' });
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
     return {
       message: 'Proveedor registrado correctamente',
@@ -90,12 +91,12 @@ export class AuthService {
         address: newProvider.address,
         role: newProvider.role,
         status: newProvider.status,
-        isCompleted: true,
+        isCompleted: newProvider.isCompleted,
       },
     };
   }
 
-  // Login de usuario con email y contraseña.
+  // Login de usuario
   async loginUser(email: string, password: string) {
     email = email.trim().toLowerCase();
     const user = await this.usersService.findByEmail(email);
@@ -106,12 +107,13 @@ export class AuthService {
 
     const payload = { id: user.id, email: user.email, role: user.role };
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '1d' }),
+      message: 'Usuario autenticado correctamente',
+      access_token: this.jwtService.sign(payload, { expiresIn: '30m' }),
       user,
     };
   }
 
-  // Login de proveedor con email y contraseña.
+  // Login de proveedor
   async loginProvider(email: string, password: string) {
     email = email.trim().toLowerCase();
     const provider = await this.providersService.findByEmail(email);
@@ -121,13 +123,16 @@ export class AuthService {
     if (!isMatch) throw new UnauthorizedException('Contraseña incorrecta');
 
     const payload = { id: provider.id, email: provider.email, role: provider.role };
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
+
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '1d' }),
+      message: 'Proveedor autenticado correctamente',
+      access_token: token,
       provider,
     };
   }
 
-  // Valida o crea un usuario autenticado con Google.
+  // Google User
   async validateOrCreateGoogleUser(userData) {
     const email = userData.email.trim().toLowerCase();
     let user = await this.usersService.findByEmail(email);
@@ -150,19 +155,19 @@ export class AuthService {
     return user;
   }
 
-  // Login de usuario autenticado con Google.
   async loginGoogleUser(user) {
     const payload = { id: user.id, email: user.email, role: user.role };
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '1d' }),
+      message: 'Usuario autenticado correctamente',
+      access_token: token,
       user,
     };
   }
 
-  // Valida o crea un proveedor autenticado con Google.
+  // Google Provider
   async validateOrCreateGoogleProvider(providerData) {
     const email = providerData.email.trim().toLowerCase();
-
     let provider = await this.providersService.findByEmail(email);
     if (provider) return provider;
 
@@ -183,30 +188,25 @@ export class AuthService {
       surnames: providerData.surnames || '',
       userName,
       email,
-      phone: null,
+      phone: '',
       password: '',
       role: Role.Provider,
-      status: 'pending',
-      isCompleted: false,
-      profilePicture: providerData.profilePicture,
     });
 
     return provider;
   }
 
-  // Login de proveedor autenticado con Google.
   async loginGoogleProvider(provider) {
     const payload = { id: provider.id, email: provider.email, role: provider.role };
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '1d' }),
+      access_token: this.jwtService.sign(payload, { expiresIn: '30m' }),
       provider,
     };
   }
 
-  // Redirección tras autenticación con Google (usuario).
   async handleGoogleUserRedirect(user: any) {
     const payload = { id: user.id, email: user.email, role: user.role };
-    const token = this.jwtService.sign(payload, { expiresIn: '1d' });
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
     const frontendBase = process.env.FRONTEND_BASE_URL;
 
     const redirectUrl = user.isCompleted
@@ -216,10 +216,9 @@ export class AuthService {
     return { redirectUrl };
   }
 
-  // Redirección tras autenticación con Google (proveedor).
   async handleGoogleProviderRedirect(provider: any) {
     const payload = { id: provider.id, email: provider.email, role: provider.role };
-    const token = this.jwtService.sign(payload, { expiresIn: '1d' });
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
     const frontendBase = process.env.FRONTEND_BASE_URL;
 
     const redirectUrl = provider.isCompleted
