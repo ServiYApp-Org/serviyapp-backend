@@ -1,0 +1,82 @@
+[
+    {
+    "name": "Corte de cabello",
+    "description": "Corte profesional para hombres y mujeres.",
+    "photo": "https://example.com/photos/corte.jpg",
+    "status": true,
+    "duration": 30,
+    "createdAt": "2025-10-30T10:00:00.000Z"
+  },
+  {
+    "name": "Manicura",
+    "description": "Servicio completo de manicura y esmaltado.",
+    "photo": "https://example.com/photos/manicura.jpg",
+    "status": true,
+    "duration": 45,
+    "createdAt": "2025-10-30T10:05:00.000Z"
+  },
+  {
+    "name": "Limpieza facial",
+    "description": "Limpieza profunda de rostro con productos naturales.",
+    "photo": "https://example.com/photos/limpieza.jpg",
+    "status": true,
+    "duration": 60,
+    "createdAt": "2025-10-30T10:10:00.000Z"
+  },
+  {
+    "name": "Masaje relajante",
+    "description": "Masaje corporal para aliviar el estrés.",
+    "photo": "https://example.com/photos/masaje.jpg",
+    "status": true,
+    "duration": 50,
+    "createdAt": "2025-10-30T10:15:00.000Z"
+  },
+  {
+    "name": "Depilación",
+    "description": "Depilación con cera para piernas y brazos.",
+    "photo": "https://example.com/photos/depilacion.jpg",
+    "status": true,
+    "duration": 40,
+    "createdAt": "2025-10-30T10:20:00.000Z"
+  },
+  {
+    "name": "Pedicura",
+    "description": "Cuidado y esmaltado de pies.",
+    "photo": "https://example.com/photos/pedicura.jpg",
+    "status": true,
+    "duration": 35,
+    "createdAt": "2025-10-30T10:25:00.000Z"
+  },
+  {
+    "name": "Coloración de cabello",
+    "description": "Tintura y mechas para todo tipo de cabello.",
+    "photo": "https://example.com/photos/coloracion.jpg",
+    "status": true,
+    "duration": 90,
+    "createdAt": "2025-10-30T10:30:00.000Z"
+  },
+  {
+    "name": "Peinado",
+    "description": "Peinados para eventos y fiestas.",
+    "photo": "https://example.com/photos/peinado.jpg",
+    "status": true,
+    "duration": 40,
+    "createdAt": "2025-10-30T10:35:00.000Z"
+  },
+  {
+    "name": "Tratamiento capilar",
+    "description": "Tratamiento nutritivo para el cabello.",
+    "photo": "https://example.com/photos/tratamiento.jpg",
+    "status": true,
+    "duration": 60,
+    "createdAt": "2025-10-30T10:40:00.000Z"
+  },
+  {
+    "name": "Maquillaje",
+    "description": "Maquillaje profesional para eventos.",
+    "photo": "https://example.com/photos/maquillaje.jpg",
+    "status": true,
+    "duration": 50,
+    "createdAt": "2025-10-30T10:45:00.000Z"
+  }
+]
