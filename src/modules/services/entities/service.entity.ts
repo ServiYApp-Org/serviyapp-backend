@@ -29,6 +29,9 @@ export class Service {
   @Column({ type: 'enum', enum: ServiceStatus, default: ServiceStatus.ACTIVE, })
   status: ServiceStatus
 
+  @Column({ type: 'int'})
+  price: number;
+
   @Column({ type: 'int', nullable: true })
   duration: number;
 

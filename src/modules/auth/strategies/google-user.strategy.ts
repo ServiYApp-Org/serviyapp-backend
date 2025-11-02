@@ -36,6 +36,7 @@ export class GoogleUserStrategy extends PassportStrategy(Strategy, 'google-user'
       };
 
       const user = await this.authService.validateOrCreateGoogleUser(userData);
+      console.log(' Usuario Google validado/creado:', user);
       done(null, user);
     } catch (error) {
       console.error('ERROR EN VALIDATE GOOGLE:', error);

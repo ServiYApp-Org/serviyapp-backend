@@ -67,6 +67,7 @@ export class ServicesSeed implements OnModuleInit {
           name: s.name,
           description: s.description,
           photo: s.photo,
+          price: s.price, 
           duration: s.duration,
           status: ServiceStatus.ACTIVE,
           provider,
