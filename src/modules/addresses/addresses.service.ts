@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Address } from './entities/address.entity';
@@ -8,80 +8,87 @@ import { Country } from 'src/modules/locations/entities/country.entity';
 import { Region } from 'src/modules/locations/entities/region.entity';
 import { City } from 'src/modules/locations/entities/city.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { Role } from 'src/modules/auth/roles.enum';
 
-// Servicio encargado de las operaciones CRUD del módulo "addresses".
 @Injectable()
 export class AddressesService {
   constructor(
     @InjectRepository(Address)
     private readonly addressRepo: Repository<Address>,
-
     @InjectRepository(Country)
     private readonly countryRepo: Repository<Country>,
-
     @InjectRepository(Region)
     private readonly regionRepo: Repository<Region>,
-
     @InjectRepository(City)
     private readonly cityRepo: Repository<City>,
-
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
   ) {}
 
-  // Crea una nueva dirección asociada a un usuario y sus ubicaciones.
-  async create(dto: CreateAddressDto) {
-    const country = await this.countryRepo.findOneBy({ id: dto.countryId });
-    const region = await this.regionRepo.findOneBy({ id: dto.regionId });
-    const city = await this.cityRepo.findOneBy({ id: dto.cityId });
-    const user = await this.userRepo.findOneBy({ id: dto.userId });
+  async create(dto: CreateAddressDto, currentUser: any) {
+    const [country, region, city] = await Promise.all([
+      this.countryRepo.findOneBy({ id: dto.countryId }),
+      this.regionRepo.findOneBy({ id: dto.regionId }),
+      this.cityRepo.findOneBy({ id: dto.cityId }),
+    ]);
 
-    if (!country) throw new NotFoundException('Country not found');
-    if (!region) throw new NotFoundException('Region not found');
-    if (!city) throw new NotFoundException('City not found');
-    if (!user) throw new NotFoundException('User not found');
+    if (!country || !region || !city)
+      throw new NotFoundException('Invalid location data.');
+
+    const user = await this.userRepo.findOneBy({ id: currentUser.id });
+    if (!user) throw new NotFoundException('User not found.');
 
     const newAddress = this.addressRepo.create({
       ...dto,
-      country: { id: dto.countryId },
-      region: { id: dto.regionId },
-      city: { id: dto.cityId },
-      user: { id: dto.userId },
+      user,
+      country,
+      region,
+      city,
+      status: true,
     });
-
     return this.addressRepo.save(newAddress);
   }
 
-  // Obtiene todas las direcciones con sus relaciones.
-  async findAll() {
+  async findAll(currentUser: any) {
+    const filter =
+      currentUser.role === Role.Admin ? {} : { user: { id: currentUser.id } };
+
     return this.addressRepo.find({
+      where: filter,
       relations: ['country', 'region', 'city', 'user'],
-      order: { name: 'ASC' },
     });
   }
 
-  // Obtiene una dirección por su ID.
-  async findOne(id: string) {
+  async findOne(id: string, currentUser: any) {
     const address = await this.addressRepo.findOne({
       where: { id },
       relations: ['country', 'region', 'city', 'user'],
     });
-
-    if (!address) throw new NotFoundException('Address not found');
+    if (!address) throw new NotFoundException('Address not found.');
+    if (
+      currentUser.role !== Role.Admin &&
+      address.user.id !== currentUser.id
+    ) {
+      throw new ForbiddenException('Access denied to this address.');
+    }
     return address;
   }
 
-  // Actualiza una dirección existente.
-  async update(id: string, dto: UpdateAddressDto) {
-    const address = await this.findOne(id);
+  async update(id: string, dto: UpdateAddressDto, currentUser: any) {
+    const address = await this.findOne(id, currentUser);
     Object.assign(address, dto);
     return this.addressRepo.save(address);
   }
 
-  // Elimina una dirección de la base de datos.
-  async remove(id: string) {
-    const address = await this.findOne(id);
-    await this.addressRepo.remove(address);
-    return { message: `Address with ID ${id} was deleted successfully.` };
+  async deactivate(id: string, currentUser: any) {
+    const address = await this.findOne(id, currentUser);
+    address.status = false;
+    return this.addressRepo.save(address);
+  }
+
+  async reactivate(id: string, currentUser: any) {
+    const address = await this.findOne(id, currentUser);
+    address.status = true;
+    return this.addressRepo.save(address);
   }
 }

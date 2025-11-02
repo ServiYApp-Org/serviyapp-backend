@@ -17,6 +17,7 @@ export class GoogleProviderStrategy extends PassportStrategy(Strategy, 'google-p
 
   // Valida o crea un proveedor después de autenticarse con Google.
   async validate(
+    
     accessToken: string,
     refreshToken: string,
     profile: any,

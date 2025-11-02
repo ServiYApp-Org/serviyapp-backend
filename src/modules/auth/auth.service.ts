@@ -9,6 +9,7 @@ import { UsersService } from 'src/modules/users/users.service';
 import { ProvidersService } from 'src/modules/providers/providers.service';
 import { Role } from './roles.enum';
 import { ProviderStatus } from '../providers/enums/provider-status.enum';
+import { getGoogleRedirectUrl } from 'src/helpers/redirect.helper';
 
 @Injectable()
 export class AuthService {
@@ -204,26 +205,27 @@ export class AuthService {
     };
   }
 
+    
+  // Maneja el redireccionamiento cuando un usuario inicia sesión con Google.
   async handleGoogleUserRedirect(user: any) {
     const payload = { id: user.id, email: user.email, role: user.role };
+    // Genera token JWT válido por 30 minutos
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
-    const frontendBase = process.env.FRONTEND_BASE_URL;
-
-    const redirectUrl = user.isCompleted
-      ? `${frontendBase}/home?token=${token}`
-      : `${frontendBase}/complete-register?role=${user.role}&token=${token}`;
+    // Usa helper centralizado
+    const redirectUrl = getGoogleRedirectUrl(user.isCompleted, user.role, token);
 
     return { redirectUrl };
   }
 
+  // Maneja el redireccionamiento cuando un proveedor inicia sesión con Google.
   async handleGoogleProviderRedirect(provider: any) {
     const payload = { id: provider.id, email: provider.email, role: provider.role };
-    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
-    const frontendBase = process.env.FRONTEND_BASE_URL;
 
-    const redirectUrl = provider.isCompleted
-      ? `${frontendBase}/provider/dashboard?token=${token}`
-      : `${frontendBase}/complete-register?role=${provider.role}&token=${token}`;
+    // Genera token JWT válido por 30 minutos
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
+
+    // Usa helper centralizado
+    const redirectUrl = getGoogleRedirectUrl(provider.isCompleted, provider.role, token);
 
     return { redirectUrl };
   }

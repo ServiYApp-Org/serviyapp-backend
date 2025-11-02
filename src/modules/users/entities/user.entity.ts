@@ -6,12 +6,14 @@ import {
   OneToMany,
   CreateDateColumn,
   Check,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { ServiceOrder } from 'src/modules/service-orders/entities/service-order.entity';
 import { Role } from 'src/modules/auth/roles.enum';
 import { Address } from 'src/modules/addresses/entities/address.entity';
 import { UserStatus } from '../enums/user-status.enum';
-
+import { Country } from 'src/modules/locations/entities/country.entity';
 
 // Entidad que representa a los usuarios del sistema.
 // Contiene datos personales, de autenticación y relaciones con pedidos y direcciones.
@@ -37,10 +39,14 @@ export class User {
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string;
 
+  @ManyToOne(() => Country, { eager: true, nullable: true })
+  @JoinColumn({ name: 'country_id' })
+  country: Country;
+
   @Column({ type: 'enum', enum: Role, default: Role.User })
   role: Role;
 
-  @Column({   type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE, })
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
   status: UserStatus;
 
   @Column({ default: false })

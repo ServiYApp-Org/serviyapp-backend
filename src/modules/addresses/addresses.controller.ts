@@ -1,41 +1,59 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AddressesService } from './addresses.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
+import { Roles } from 'src/modules/auth/decorators/roles.decorator';
+import { Role } from 'src/modules/auth/roles.enum';
+import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard'; 
 
-// Controlador del módulo "addresses".
-// Gestiona la creación, consulta, actualización y eliminación de direcciones.
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('addresses')
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
-  // Crea una nueva dirección.
   @Post()
-  async create(@Body() dto: CreateAddressDto) {
-    return this.addressesService.create(dto);
+  @Roles(Role.User, Role.Admin)
+  async create(@Body() dto: CreateAddressDto, @Req() req) {
+    return this.addressesService.create(dto, req.user);
   }
 
-  // Obtiene todas las direcciones registradas.
   @Get()
-  async findAll() {
-    return this.addressesService.findAll();
+  @Roles(Role.User, Role.Admin)
+  async findAll(@Req() req) {
+    return this.addressesService.findAll(req.user);
   }
 
-  // Obtiene una dirección por su ID.
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.addressesService.findOne(id);
+  @Roles(Role.User, Role.Admin)
+  async findOne(@Param('id') id: string, @Req() req) {
+    return this.addressesService.findOne(id, req.user);
   }
 
-  // Actualiza parcialmente una dirección existente.
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateAddressDto) {
-    return this.addressesService.update(id, dto);
+  @Roles(Role.User, Role.Admin)
+  async update(@Param('id') id: string, @Body() dto: UpdateAddressDto, @Req() req) {
+    return this.addressesService.update(id, dto, req.user);
   }
 
-  // Elimina una dirección del sistema.
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.addressesService.remove(id);
+  @Patch('deactivate/:id')
+  @Roles(Role.User, Role.Admin)
+  async deactivate(@Param('id') id: string, @Req() req) {
+    return this.addressesService.deactivate(id, req.user);
+  }
+
+  @Patch('reactivate/:id')
+  @Roles(Role.User, Role.Admin)
+  async reactivate(@Param('id') id: string, @Req() req) {
+    return this.addressesService.reactivate(id, req.user);
   }
 }

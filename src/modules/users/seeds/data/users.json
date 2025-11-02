@@ -7,6 +7,7 @@
     "password": "admin123",
     "role": "admin",
     "address": "Calle 1 #23-45",
+    "country": "Colombia",
     "profilePicture": "https://example.com/admin-avatar.jpg"
   },
   {
@@ -16,7 +17,8 @@
     "phone": "573002223344",
     "password": "123456",
     "role": "user",
-    "address": "Carrera 15 #8-90"
+    "address": "Carrera 15 #8-90",
+    "country": "Colombia"
   },
   {
     "names": "Carlos",
@@ -25,7 +27,8 @@
     "phone": "573003334455",
     "password": "123456",
     "role": "user",
-    "address": "Av. Siempre Viva 742"
+    "address": "Av. Siempre Viva 742",
+    "country": "Argentina"
   },
   {
     "names": "Sofía",
@@ -34,7 +37,8 @@
     "phone": "573004445566",
     "password": "123456",
     "role": "user",
-    "address": "Cl 80 #20-50"
+    "address": "Cl 80 #20-50",
+    "country": "Colombia"
   },
   {
     "names": "Andrés",
@@ -43,7 +47,8 @@
     "phone": "573005556677",
     "password": "123456",
     "role": "user",
-    "address": "Cra 45 #11-22"
+    "address": "Cra 45 #11-22",
+    "country": "Mexico"
   },
   {
     "names": "María",
@@ -52,7 +57,8 @@
     "phone": "573006667788",
     "password": "123456",
     "role": "user",
-    "address": "Cl 26 #7-90"
+    "address": "Cl 26 #7-90",
+    "country": "Colombia"
   },
   {
     "names": "Felipe",
@@ -61,7 +67,8 @@
     "phone": "573007778899",
     "password": "123456",
     "role": "user",
-    "address": "Av. Boyacá #30-25"
+    "address": "Av. Boyacá #30-25",
+    "country": "Argentina"
   },
   {
     "names": "Diana",
@@ -70,7 +77,8 @@
     "phone": "573008889900",
     "password": "123456",
     "role": "user",
-    "address": "Cl 40 #18-10"
+    "address": "Cl 40 #18-10",
+    "country": "Colombia"
   },
   {
     "names": "Miguel",
@@ -79,7 +87,8 @@
     "phone": "573009990011",
     "password": "123456",
     "role": "user",
-    "address": "Cra 13 #25-15"
+    "address": "Cra 13 #25-15",
+    "country": "Mexico"
   },
   {
     "names": "Valentina",
@@ -88,6 +97,7 @@
     "phone": "573001234567",
     "password": "123456",
     "role": "user",
-    "address": "Cl 100 #9-55"
+    "address": "Cl 100 #9-55",
+    "country": "Colombia"
   }
 ]

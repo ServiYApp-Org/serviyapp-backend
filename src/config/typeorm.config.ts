@@ -5,11 +5,12 @@ import * as dotenv from 'dotenv';
 // Detectar entorno ANTES de cargar dotenv
 const nodeEnv = process.env.NODE_ENV?.trim() || 'development';
 const isProduction = nodeEnv === 'production';
+const isDevelopment = nodeEnv === 'development';
 
 // Determinar archivo a cargar
 const envFilePath = isProduction ? '.production.env' : '.development.env';
 
-// Forzar carga del archivo correcto (y sobrescribir lo previo)
+// Cargar archivo correspondiente
 dotenv.config({ path: envFilePath, override: true });
 
 console.log(`Entorno actual: ${nodeEnv}`);
@@ -32,7 +33,8 @@ const config: DataSourceOptions = isProduction
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      synchronize: true,
+      synchronize: true, // crea tablas automáticamente
+      dropSchema: isDevelopment, // elimina el esquema solo en desarrollo
       ssl: false,
       entities: [__dirname + '/../**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/../migrations/*{.ts,.js}'],
@@ -41,3 +43,4 @@ const config: DataSourceOptions = isProduction
 
 export default registerAs('typeorm', () => config);
 export const connectionSource = new DataSource(config);
+
