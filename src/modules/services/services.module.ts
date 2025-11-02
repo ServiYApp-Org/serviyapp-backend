@@ -5,7 +5,7 @@ import { ServicesService } from './services.service';
 import { Service } from './entities/service.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Provider } from '../providers/entities/provider.entity';
-import { ServicesSeed } from './seeds/services.seeder';
+import { ServicesSeed } from './seeds/services.seed';
 import { ProvidersModule } from '../providers/providers.module';
 
 // Módulo encargado de la gestión de servicios.

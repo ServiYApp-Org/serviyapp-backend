@@ -13,6 +13,7 @@ import { ServicesModule } from './modules/services/services.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ServiceOrdersModule } from './modules/service-orders/service-orders.module';
 import { LocationsModule } from './modules/locations/locations.module'; 
+import { SeedsModule } from './modules/seeds/seeds.module';
 
 @Module({
   imports: [
@@ -40,6 +41,8 @@ import { LocationsModule } from './modules/locations/locations.module';
     LocationsModule, 
     ServicesModule,
     ServiceOrdersModule,
+
+    SeedsModule,
 
   ],
   controllers: [AppController],
