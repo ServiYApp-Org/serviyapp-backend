@@ -4,8 +4,9 @@ import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Service } from '../entities/service.entity';
-import { Category } from 'src/modules/categories/entities/category.entity';
 import { Provider } from 'src/modules/providers/entities/provider.entity';
+import { Category } from 'src/modules/categories/entities/category.entity';
+import { ServiceStatus } from '../enums/service-status.enum';
 
 @Injectable()
 export class ServicesSeed implements OnModuleInit {
@@ -14,63 +15,71 @@ export class ServicesSeed implements OnModuleInit {
   constructor(
     @InjectRepository(Service)
     private readonly serviceRepo: Repository<Service>,
-
-    @InjectRepository(Category)
-    private readonly categoryRepo: Repository<Category>,
-
     @InjectRepository(Provider)
     private readonly providerRepo: Repository<Provider>,
+    @InjectRepository(Category)
+    private readonly categoryRepo: Repository<Category>,
   ) {}
 
   async onModuleInit() {
-    if (process.env.SEED_ON_START !== 'true') {
-      this.logger.log('[ServicesSeed] SEED_ON_START=false → no se ejecuta el seed.');
-      return;
-    }
+    if (process.env.NODE_ENV === 'production') return;
 
     const count = await this.serviceRepo.count();
     if (count > 0) {
-      this.logger.warn('[ServicesSeed] Servicios ya existen, se omite precarga.');
+      this.logger.warn('[ServicesSeed] Servicios ya existentes, se omite precarga.');
       return;
     }
 
     const filePath = path.join('src/modules/services/seeds/data/services.json');
     if (!fs.existsSync(filePath)) {
-      this.logger.error(`[ServicesSeed] No se encontró el archivo services.json en ${filePath}`);
+      this.logger.error(`[ServicesSeed] No se encontró el archivo: ${filePath}`);
       return;
     }
 
     const rawData = fs.readFileSync(filePath, 'utf8');
-    const data = JSON.parse(rawData);
-    this.logger.log(`[ServicesSeed] ${data.length} servicios encontrados en el JSON.`);
+    const servicesData = JSON.parse(rawData);
 
-    const categories = await this.categoryRepo.find();
     const providers = await this.providerRepo.find();
+    const categories = await this.categoryRepo.find();
 
-    if (!categories.length || !providers.length) {
-      this.logger.error('[ServicesSeed] Faltan categorías o proveedores en la base.');
+    if (!providers.length || !categories.length) {
+      this.logger.error('[ServicesSeed] No hay proveedores o categorías en la base.');
       return;
     }
 
-    for (const s of data) {
-      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-      const randomProvider = providers[Math.floor(Math.random() * providers.length)];
+    // Asignar 2 servicios por proveedor
+    for (const provider of providers) {
+      const usedIndexes = new Set<number>(); // para evitar repetir servicios
 
-      const service = this.serviceRepo.create({
-        name: s.name,
-        description: s.description,
-        photo: s.photo,
-        status: s.status,
-        duration: s.duration,
-        createdAt: new Date(),
-        category: randomCategory,
-        provider: randomProvider,
-      });
+      for (let i = 0; i < 2; i++) {
+        // Elegir servicio aleatorio no repetido
+        let randomIndex: number;
+        do {
+          randomIndex = Math.floor(Math.random() * servicesData.length);
+        } while (usedIndexes.has(randomIndex));
+        usedIndexes.add(randomIndex);
 
-      await this.serviceRepo.save(service);
-      this.logger.log(`✅ Servicio creado: ${s.name} → ${randomProvider.names}`);
+        const s = servicesData[randomIndex];
+        const randomCategory =
+          categories[Math.floor(Math.random() * categories.length)];
+
+        const service = this.serviceRepo.create({
+          name: s.name,
+          description: s.description,
+          photo: s.photo,
+          duration: s.duration,
+          status: ServiceStatus.ACTIVE,
+          provider,
+          category: randomCategory,
+        });
+
+        await this.serviceRepo.save(service);
+        this.logger.log(
+          `Servicio creado: ${s.name} → Proveedor: ${provider.names} (${randomCategory.name})`
+        );
+      }
     }
 
-    this.logger.log('[ServicesSeed] Servicios creados correctamente.');
+    this.logger.log('[ServicesSeed] Se crearon 2 servicios por proveedor correctamente.');
   }
 }
