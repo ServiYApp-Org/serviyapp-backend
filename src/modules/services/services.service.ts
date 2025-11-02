@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service } from './entities/service.entity';
@@ -6,27 +6,26 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { Provider } from '../providers/entities/provider.entity';
 import { Category } from '../categories/entities/category.entity';
+import { Role } from '../auth/roles.enum';
+import { ServiceStatus } from './enums/service-status.enum';
 
-// Servicio encargado de la lógica de negocio de los servicios.
-// Gestiona la creación, consulta, actualización y eliminación de servicios.
 @Injectable()
 export class ServicesService {
   constructor(
     @InjectRepository(Service)
     private readonly serviceRepository: Repository<Service>,
-
     @InjectRepository(Provider)
     private readonly providerRepository: Repository<Provider>,
-
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  // Crear un nuevo servicio asociado a un proveedor y categoría.
-  async create(dto: CreateServiceDto): Promise<Service> {
-    const provider = await this.providerRepository.findOne({
-      where: { id: dto.providerId },
-    });
+  // Crear un nuevo servicio
+  async create(dto: CreateServiceDto, user: any): Promise<Service> {
+    const provider = user.role === Role.Admin
+      ? await this.providerRepository.findOne({ where: { id: dto.providerId } })
+      : await this.providerRepository.findOne({ where: { email: user.email } });
+
     if (!provider) throw new NotFoundException('Proveedor no encontrado');
 
     const category = await this.categoryRepository.findOne({
@@ -38,38 +37,55 @@ export class ServicesService {
       name: dto.name,
       description: dto.description,
       photo: dto.photo,
-      status: dto.status ?? true,
       duration: dto.duration,
       provider,
       category,
+      status: ServiceStatus.ACTIVE,
     });
 
     return await this.serviceRepository.save(service);
   }
 
-  // Obtener todos los servicios registrados.
-  async findAll(): Promise<Service[]> {
+  // Ver todos los servicios (admin o proveedor)
+  async findAllPublic(): Promise<Service[]> {
     return await this.serviceRepository.find({
       relations: ['provider', 'category'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  // Obtener un servicio por su ID.
-  async findOne(id: string): Promise<Service> {
+  // Buscar por ID (control de acceso)
+  async findOnePublic(id: string): Promise<Service> {
     const service = await this.serviceRepository.findOne({
       where: { id },
       relations: ['provider', 'category'],
     });
-    if (!service) throw new NotFoundException(`Servicio con ID ${id} no encontrado`);
+    if (!service) throw new NotFoundException('Servicio no encontrado');
     return service;
   }
 
-  // Actualizar un servicio existente.
-  async update(id: string, dto: UpdateServiceDto): Promise<Service> {
-    const service = await this.findOne(id);
+  // Método interno con validación de permisos
+  private async findOne(id: string, user: any): Promise<Service> {
+    const service = await this.serviceRepository.findOne({
+      where: { id },
+      relations: ['provider', 'category'],
+    });
 
-    if (dto.providerId) {
+    if (!service) throw new NotFoundException('Servicio no encontrado');
+
+    // Verifica permisos
+    if (user.role !== Role.Admin && service.provider.email !== user.email) {
+      throw new ForbiddenException('No tienes permiso para acceder a este servicio.');
+    }
+
+    return service;
+  }
+
+  // Actualizar (admin o propietario)
+  async update(id: string, dto: UpdateServiceDto, user: any): Promise<Service> {
+    const service = await this.findOne(id, user);
+
+    if (dto.providerId && user.role === Role.Admin) {
       const provider = await this.providerRepository.findOne({
         where: { id: dto.providerId },
       });
@@ -89,9 +105,10 @@ export class ServicesService {
     return await this.serviceRepository.save(service);
   }
 
-  // Eliminar un servicio por su ID.
-  async remove(id: string): Promise<void> {
-    const service = await this.findOne(id);
-    await this.serviceRepository.remove(service);
+  // Cambiar estado (activar/desactivar)
+  async changeStatus(id: string, user: any, status: ServiceStatus): Promise<Service> {
+    const service = await this.findOne(id, user);
+    service.status = status;
+    return await this.serviceRepository.save(service);
   }
 }

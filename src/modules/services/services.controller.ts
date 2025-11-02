@@ -5,45 +5,59 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/roles.enum';
+import { ServiceStatus } from './enums/service-status.enum';
 
-// Controlador encargado de la gestión de servicios.
-// Permite crear, listar, consultar, actualizar y eliminar servicios.
 @Controller('services')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
-  // Crear un nuevo servicio.
-  @Post('create')
-  create(@Body() createServiceDto: CreateServiceDto) {
-    return this.servicesService.create(createServiceDto);
-  }
-
-  // Obtener todos los servicios registrados.
+  // PÚBLICOS
   @Get('find-all')
   findAll() {
-    return this.servicesService.findAll();
+    return this.servicesService.findAllPublic();
   }
 
-  // Obtener un servicio por su ID.
   @Get('find/:id')
   findOne(@Param('id') id: string) {
-    return this.servicesService.findOne(id);
+    return this.servicesService.findOnePublic(id);
   }
 
-  // Actualizar un servicio existente.
+  // PROTEGIDOS
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post('create')
+  @Roles(Role.Provider, Role.Admin)
+  create(@Body() dto: CreateServiceDto, @Req() req) {
+    return this.servicesService.create(dto, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch('update/:id')
-  update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
-    return this.servicesService.update(id, updateServiceDto);
+  @Roles(Role.Provider, Role.Admin)
+  update(@Param('id') id: string, @Body() dto: UpdateServiceDto, @Req() req) {
+    return this.servicesService.update(id, dto, req.user);
   }
 
-  // Eliminar un servicio por su ID.
-  @Delete('delete/:id')
-  remove(@Param('id') id: string) {
-    return this.servicesService.remove(id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Patch('deactivate/:id')
+  @Roles(Role.Provider, Role.Admin)
+  deactivate(@Param('id') id: string, @Req() req) {
+    return this.servicesService.changeStatus(id, req.user, ServiceStatus.INACTIVE);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Patch('activate/:id')
+  @Roles(Role.Provider, Role.Admin)
+  activate(@Param('id') id: string, @Req() req) {
+    return this.servicesService.changeStatus(id, req.user, ServiceStatus.ACTIVE);
   }
 }
