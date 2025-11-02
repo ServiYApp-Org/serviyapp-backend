@@ -1,27 +1,26 @@
-/**
- * Genera la URL de redirección al frontend según el rol, el estado del registro y el token JWT.
- */
 export const getGoogleRedirectUrl = (
   isCompleted: boolean,
   role: string,
   token: string,
 ): string => {
+  const base = process.env.FRONTEND_BASE_URL;
+
   if (isCompleted) {
-    // Si el perfil está completo  redirigir al dashboard correspondiente
+    // ✅ Usuario con registro completo → dashboard correspondiente
     switch (role) {
       case 'user':
-        return `${process.env.FRONTEND_USER_HOME}?token=${token}`;
+        return `${base}/user/dashboard?token=${token}`;
       case 'provider':
-        return `${process.env.FRONTEND_PROVIDER_HOME}?token=${token}`;
+        return `${base}/provider/dashboard?token=${token}`;
       case 'admin':
-        return `${process.env.FRONTEND_ADMIN_HOME}?token=${token}`;
+        return `${base}/admin/dashboard?token=${token}`;
       default:
-        return process.env.FRONTEND_BASE_URL || '/';
+        return `${base}/login`;
     }
   } else {
-    // Si el perfil no está completo → redirigir al flujo de completar registro
+    // ⚙️ Usuario o proveedor incompleto → flujo de completar registro
     return role === 'provider'
-      ? `${process.env.FRONTEND_GOOGLE_PROVIDER_INCOMPLETE}?role=${role}&token=${token}`
-      : `${process.env.FRONTEND_GOOGLE_USER_INCOMPLETE}?role=${role}&token=${token}`;
+      ? `${base}/complete-register-provider/provider?role=${role}&token=${token}`
+      : `${base}/complete-register-user/user?role=${role}&token=${token}`;
   }
 };

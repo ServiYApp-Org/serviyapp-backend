@@ -205,28 +205,78 @@ export class AuthService {
     };
   }
 
-    
-  // Maneja el redireccionamiento cuando un usuario inicia sesión con Google.
+
+  
+
   async handleGoogleUserRedirect(user: any) {
-    const payload = { id: user.id, email: user.email, role: user.role };
-    // Genera token JWT válido por 30 minutos
-    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
-    // Usa helper centralizado
-    const redirectUrl = getGoogleRedirectUrl(user.isCompleted, user.role, token);
+    console.log(' handleGoogleUserRedirect: usuario recibido =>', user);
 
+    if (!user || !user.id) {
+      console.error('❌ Usuario sin ID al manejar redirección Google User');
+      return {
+        redirectUrl:
+          process.env.FRONTEND_BASE_URL + '/login?error=google_user_not_found',
+      };
+    }
+
+    const payload = { id: user.id, email: user.email, role: user.role || Role.User };
+    const token = this.jwtService.sign(payload, { expiresIn: '30m' });
+
+    const redirectUrl = getGoogleRedirectUrl(user.isCompleted, payload.role, token);
+
+    console.log(' Redirigiendo al frontend:', redirectUrl);
     return { redirectUrl };
   }
+  // // Maneja el redireccionamiento cuando un usuario inicia sesión con Google.
+  // async handleGoogleUserRedirect(user: any) {
+  //   const payload = { id: user.id, email: user.email, role: user.role };
+  //   // Genera token JWT válido por 30 minutos
+  //   const token = this.jwtService.sign(payload, { expiresIn: '30m' });
+  //   // Usa helper centralizado
+  //   const redirectUrl = getGoogleRedirectUrl(user.isCompleted, user.role, token);
 
-  // Maneja el redireccionamiento cuando un proveedor inicia sesión con Google.
+  //   return { redirectUrl };
+  // }
+
+
   async handleGoogleProviderRedirect(provider: any) {
-    const payload = { id: provider.id, email: provider.email, role: provider.role };
+    console.log(' handleGoogleProviderRedirect: proveedor recibido =>', provider);
 
-    // Genera token JWT válido por 30 minutos
+    if (!provider || !provider.id) {
+      console.error('❌ Proveedor sin ID al manejar redirección Google');
+      return {
+        redirectUrl:
+          process.env.FRONTEND_BASE_URL + '/login?error=google_provider_not_found',
+      };
+    }
+
+    const payload = {
+      id: provider.id,
+      email: provider.email,
+      role: provider.role || Role.Provider,
+    };
+
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
-    // Usa helper centralizado
-    const redirectUrl = getGoogleRedirectUrl(provider.isCompleted, provider.role, token);
+    const redirectUrl = getGoogleRedirectUrl(
+      provider.isCompleted,
+      payload.role,
+      token,
+    );
 
+    console.log(' Redirigiendo al frontend:', redirectUrl);
     return { redirectUrl };
   }
+  // // Maneja el redireccionamiento cuando un proveedor inicia sesión con Google.
+  // async handleGoogleProviderRedirect(provider: any) {
+  //   const payload = { id: provider.id, email: provider.email, role: provider.role };
+
+  //   // Genera token JWT válido por 30 minutos
+  //   const token = this.jwtService.sign(payload, { expiresIn: '30m' });
+
+  //   // Usa helper centralizado
+  //   const redirectUrl = getGoogleRedirectUrl(provider.isCompleted, provider.role, token);
+
+  //   return { redirectUrl };
+  // }
 }
