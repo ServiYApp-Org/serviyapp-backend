@@ -25,12 +25,9 @@ export class AuthService {
     const existing = await this.usersService.findByEmail(email);
     if (existing) throw new BadRequestException('El correo ya está registrado');
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-
     const newUser = await this.usersService.create({
       ...data,
       email,
-      password: hashedPassword,
       role: data.role || Role.User,
     });
 
@@ -57,15 +54,13 @@ export class AuthService {
     const existing = await this.providersService.findByEmail(email);
     if (existing) throw new BadRequestException('El correo ya está registrado');
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-
-    const newProvider = await this.providersService.create({
+      const newProvider = await this.providersService.create({
       names: data.firstName,
       surnames: data.lastName,
       userName: data.username,
       email,
       phone: data.phone,
-      password: hashedPassword,
+      password: data.password,
       countryId: data.country,
       regionId: data.region,
       cityId: data.city,
