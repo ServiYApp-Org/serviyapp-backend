@@ -10,6 +10,8 @@ import { ProvidersService } from 'src/modules/providers/providers.service';
 import { Role } from './roles.enum';
 import { ProviderStatus } from '../providers/enums/provider-status.enum';
 import { getGoogleRedirectUrl } from 'src/helpers/redirect.helper';
+import { CreateProviderManualDto } from '../providers/dto/create-provider-manual.dto';
+import { CreateProviderGoogleDto } from '../providers/dto/create-provider-google.dto';
 
 @Injectable()
 export class AuthService {
@@ -54,22 +56,22 @@ export class AuthService {
   }
 
   // Registro de proveedor (con validación de país, región, ciudad)
-  async registerProvider(data: any) {
+  async registerProvider(data: CreateProviderManualDto) {
     const email = data.email.trim().toLowerCase();
     const existing = await this.providersService.findByEmail(email);
     if (existing) throw new BadRequestException('El correo ya está registrado');
 
     const newProvider = await this.providersService.create({
-      names: data.firstName,
-      surnames: data.lastName,
-      userName: data.username,
+      names: data.names,
+      surnames: data.surnames,
+      userName: data.userName,
       email,
       phone: data.phone,
       password: data.password,
-      countryId: data.country,
-      regionId: data.region,
-      cityId: data.city,
-      address: data.address || data.Address || data.Adreess,
+      countryId: data.countryId,
+      regionId: data.regionId,
+      cityId: data.cityId,
+      address: data.address || data.address || data.address,
       role: Role.Provider,
     });
 
@@ -180,7 +182,7 @@ export class AuthService {
   }
 
   // Google Provider
-  async validateOrCreateGoogleProvider(providerData) {
+  async validateOrCreateGoogleProvider(providerData: CreateProviderGoogleDto) {
     const email = providerData.email.trim().toLowerCase();
     let provider = await this.providersService.findByEmail(email);
     if (provider) return provider;
@@ -246,7 +248,7 @@ export class AuthService {
 
   async handleGoogleProviderRedirect(provider: any) {
     console.log(
-      ' handleGoogleProviderRedirect: proveedor recibido =>',
+      '🔹 handleGoogleProviderRedirect: proveedor recibido =>',
       provider,
     );
 
@@ -255,7 +257,7 @@ export class AuthService {
       return {
         redirectUrl:
           process.env.FRONTEND_BASE_URL +
-          '/login?error=google_provider_not_found',
+          '/loginProvider?error=google_provider_not_found',
       };
     }
 
@@ -263,20 +265,25 @@ export class AuthService {
       id: provider.id,
       email: provider.email,
       role: provider.role || Role.Provider,
+      isCompleted: provider.isCompleted,
     };
 
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
-    const redirectUrl = getGoogleRedirectUrl(
-      provider.isCompleted,
-      payload.id,
-      payload.role,
-      token,
-    );
+    // Si aún no ha completado su perfil
+    if (!provider.isCompleted) {
+      const redirectUrl = `${process.env.FRONTEND_BASE_URL}/google-callback-provider?id=${provider.id}&token=${token}`;
+      console.log(' Redirigiendo al callback provider:', redirectUrl);
+      return { redirectUrl };
+    }
 
-    console.log(' Redirigiendo al frontend:', redirectUrl);
+    // Si ya lo completó, lo mandas directo al dashboard
+    const redirectUrl = `${process.env.FRONTEND_BASE_URL}/provider/dashboard?token=${token}`;
+    console.log(' Redirigiendo al dashboard provider:', redirectUrl);
+
     return { redirectUrl };
   }
+
   // // Maneja el redireccionamiento cuando un proveedor inicia sesión con Google.
   // async handleGoogleProviderRedirect(provider: any) {
   //   const payload = { id: provider.id, email: provider.email, role: provider.role };
@@ -290,17 +297,28 @@ export class AuthService {
   //   return { redirectUrl };
   // }
   // Obtener perfil según rol (para /auth/me)
-  async getProfile(id: string, role: Role) {
-    if (role === Role.Provider) {
-      const provider = await this.providersService.findOne(id);
-      return provider;
-    }
+  // auth.service.ts
+async getProfile(id: string, role: Role | string) {
+  // 🔹 Normalizamos el rol (por si viene "provider" o "Provider")
+  const normalizedRole = String(role).toLowerCase();
 
-    if (role === Role.User) {
-      const user = await this.usersService.findOne(id);
-      return user;
-    }
-
-    throw new BadRequestException('Rol no válido');
+  if (normalizedRole === 'provider') {
+    const provider = await this.providersService.findOne(id);
+    if (!provider) throw new BadRequestException('Proveedor no encontrado');
+    return provider;
   }
+
+  if (normalizedRole === 'user') {
+    const user = await this.usersService.findOne(id);
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+    return user;
+  }
+
+  if (normalizedRole === 'admin') {
+    return { message: 'Perfil de administrador autenticado correctamente' };
+  }
+
+  throw new BadRequestException(`Rol no válido: ${role}`);
+}
+
 }
