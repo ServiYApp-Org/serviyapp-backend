@@ -17,9 +17,12 @@ import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { Roles } from 'src/modules/auth/decorators/roles.decorator';
 import { Role } from 'src/modules/auth/roles.enum';
 import { UserStatus } from './enums/user-status.enum';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-
-
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 // Controlador encargado de la gestión de usuarios.
 // Permite listar, consultar, actualizar y eliminar perfiles.
@@ -43,7 +46,9 @@ export class UsersController {
 
     // Solo el propio usuario o el admin pueden ver los datos
     if (currentUser.role !== Role.Admin && currentUser.id !== id) {
-      throw new ForbiddenException('No tienes permiso para acceder a este perfil');
+      throw new ForbiddenException(
+        'No tienes permiso para acceder a este perfil',
+      );
     }
 
     return this.usersService.findOne(id);
@@ -62,7 +67,9 @@ export class UsersController {
 
     // Solo el propio usuario o un admin pueden modificarlo
     if (user.role !== Role.Admin && user.id !== id)
-      throw new ForbiddenException('No tienes permiso para modificar este perfil');
+      throw new ForbiddenException(
+        'No tienes permiso para modificar este perfil',
+      );
 
     // Construimos los campos editables dinámicamente
     const safeData: any = { ...dto };
@@ -84,7 +91,6 @@ export class UsersController {
     };
   }
 
-
   // Completar registro tras autenticación con Google.
   // Permite completar datos faltantes y marcar el perfil como completo.
   @Patch('complete/:id')
@@ -96,12 +102,15 @@ export class UsersController {
   ) {
     const currentUser = req.user;
     if (currentUser.role !== Role.Admin && currentUser.id !== id)
-      throw new ForbiddenException('No tienes permiso para completar este perfil');
+      throw new ForbiddenException(
+        'No tienes permiso para completar este perfil',
+      );
 
-    const { email, role, isCompleted, ...safeData } = dto as any;
+    const { email, role, isCompleted, country, ...rest } = dto as any;
 
     const updatedUser = await this.usersService.update(id, {
-      ...safeData,
+      ...rest,
+      ...(country && { country: country }), // ✅ asigna relación
       isCompleted: true,
     });
 
@@ -121,13 +130,14 @@ export class UsersController {
 
     // Solo el propio usuario o el admin pueden eliminar
     if (currentUser.role !== Role.Admin && currentUser.id !== id) {
-      throw new ForbiddenException('No tienes permiso para eliminar este usuario');
+      throw new ForbiddenException(
+        'No tienes permiso para eliminar este usuario',
+      );
     }
 
     return this.usersService.remove(id);
   }
 
-  
   // Reactivar un usuario (solo el propio usuario o un administrador)
   @Patch(':id/reactivate')
   @Roles(Role.Admin, Role.User)
@@ -135,10 +145,11 @@ export class UsersController {
     const currentUser = req.user;
 
     if (currentUser.role !== Role.Admin && currentUser.id !== id) {
-      throw new ForbiddenException('No tienes permiso para reactivar esta cuenta');
+      throw new ForbiddenException(
+        'No tienes permiso para reactivar esta cuenta',
+      );
     }
-    
+
     return this.usersService.reactivate(id);
   }
-
 }

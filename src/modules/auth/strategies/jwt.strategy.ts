@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UsersService } from 'src/modules/users/users.service';
 
-// Estrategia JWT que valida tokens enviados en el encabezado Authorization.
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly usersService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -13,8 +13,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // Retorna los datos del usuario si el token es válido.
   async validate(payload: any) {
-    return { id: payload.id, email: payload.email, role: payload.role };
+    const user = await this.usersService.findOne(payload.id);
+
+    if (!user) {
+      throw new UnauthorizedException('Token inválido, usuario no encontrado');
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
   }
 }

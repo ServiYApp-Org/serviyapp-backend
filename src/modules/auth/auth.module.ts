@@ -3,7 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { AuthController } from './auth.controller'; 
+import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { ProvidersModule } from '../providers/providers.module';
 import { GoogleProviderStrategy } from './strategies/google-provider.strategy';
@@ -30,17 +30,17 @@ import { GoogleUserStrategy } from './strategies/google-user.strategy';
   ],
 
   // Controladores asociados al módulo de autenticación.
-  controllers: [AuthController], 
+  controllers: [AuthController],
 
   // Servicios y estrategias utilizadas en la autenticación.
   providers: [
-    AuthService,              // Servicio principal de autenticación.
-    JwtStrategy,              // Estrategia para validar tokens JWT.
-    GoogleProviderStrategy,   // Estrategia Google para proveedores.
-    GoogleUserStrategy,       // Estrategia Google para usuarios.
+    AuthService, // Servicio principal de autenticación.
+    JwtStrategy, // Estrategia para validar tokens JWT.
+    GoogleProviderStrategy, // Estrategia Google para proveedores.
+    GoogleUserStrategy, // Estrategia Google para usuarios.
   ],
 
   // Exporta el servicio para que pueda ser utilizado en otros módulos.
-  exports: [AuthService],
+  exports: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
