@@ -46,18 +46,18 @@ export class Provider {
   // Relaciones con entidades de ubicación
   @ManyToOne(() => Country, { eager: true, nullable: true })
   @JoinColumn({ name: 'country_id' })
-  country: Country;
+  country?: Country | null;
 
   @ManyToOne(() => Region, { eager: true, nullable: true })
   @JoinColumn({ name: 'region_id' })
-  region: Region;
+  region: Region | null;
 
   @ManyToOne(() => City, { eager: true, nullable: true })
   @JoinColumn({ name: 'city_id' })
-  city: City;
+  city: City | null;
 
   @Column({ type: 'varchar', length: 150, nullable: true })
-  address: string;
+  address: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   profilePicture?: string;
@@ -65,7 +65,11 @@ export class Provider {
   @Column({ type: 'enum', enum: Role, default: Role.Provider })
   role: Role;
 
-  @Column({   type: 'enum', enum: ProviderStatus, default: ProviderStatus.PENDING, })
+  @Column({
+    type: 'enum',
+    enum: ProviderStatus,
+    default: ProviderStatus.PENDING,
+  })
   status: ProviderStatus;
 
   @Column({ default: false })

@@ -1,5 +1,6 @@
 export const getGoogleRedirectUrl = (
   isCompleted: boolean,
+  id:string,
   role: string,
   token: string,
 ): string => {
@@ -20,7 +21,7 @@ export const getGoogleRedirectUrl = (
   } else {
     // Usuario o proveedor incompleto → flujo de completar registro
     return role === 'provider'
-      ? `${base}/complete-register-provider/?role=${role}&token=${token}`
-      : `${base}/complete-register-user/?role=${role}&token=${token}`;
+      ? `${base}/complete-register-provider/?id=${id}&token=${token}`
+      : `${base}/complete-register-user/?id=${id}&token=${token}`;
   }
 };

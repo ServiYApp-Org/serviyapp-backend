@@ -45,16 +45,16 @@ export class ProvidersService {
     });
   }
 
-// Buscar proveedor por ID
-async findOne(id: string): Promise<Provider> {
-  const provider = await this.providerRepository.findOne({
-    where: { id },
-    relations: ['country', 'region', 'city'],
-  });
-  if (!provider)
-    throw new NotFoundException(`Proveedor con ID ${id} no encontrado`);
-  return provider;
-}
+  // Buscar proveedor por ID
+  async findOne(id: string): Promise<Provider> {
+    const provider = await this.providerRepository.findOne({
+      where: { id },
+      relations: ['country', 'region', 'city'],
+    });
+    if (!provider)
+      throw new NotFoundException(`Proveedor con ID ${id} no encontrado`);
+    return provider;
+  }
 
   // Validar coherencia país → región → ciudad
   private async validateLocation(
@@ -68,7 +68,9 @@ async findOne(id: string): Promise<Provider> {
       );
     }
 
-    const country = await this.countryRepo.findOne({ where: { id: countryId } });
+    const country = await this.countryRepo.findOne({
+      where: { id: countryId },
+    });
     if (!country) throw new BadRequestException('El país no existe.');
 
     const region = await this.regionRepo.findOne({
@@ -95,11 +97,21 @@ async findOne(id: string): Promise<Provider> {
     try {
       const { countryId, regionId, cityId, ...rest } = data;
 
-      const { country, region, city } = await this.validateLocation(
-        countryId,
-        regionId,
-        cityId,
-      );
+      let country: Country | null = null;
+      let region: Region | null = null;
+      let city: City | null = null;
+
+      // Solo valida si vienen los IDs (registro manual)
+      if (countryId && regionId && cityId) {
+        const validated = await this.validateLocation(
+          countryId,
+          regionId,
+          cityId,
+        );
+        country = validated.country;
+        region = validated.region;
+        city = validated.city;
+      }
 
       const provider = this.providerRepository.create({
         ...rest,
@@ -107,7 +119,7 @@ async findOne(id: string): Promise<Provider> {
         region,
         city,
         status: ProviderStatus.PENDING,
-        isCompleted: false,
+        isCompleted: !!(country && region && city),
         registrationDate: new Date(),
       }) as unknown as Provider;
 
@@ -124,9 +136,6 @@ async findOne(id: string): Promise<Provider> {
       );
     }
   }
-
-
-
 
   // Obtener todos
   async findAll(status?: ProviderStatus): Promise<Provider[]> {
@@ -149,9 +158,9 @@ async findOne(id: string): Promise<Provider> {
 
     if (data.countryId || data.regionId || data.cityId) {
       const { country, region, city } = await this.validateLocation(
-        data.countryId ?? provider.country.id,
-        data.regionId ?? provider.region.id,
-        data.cityId ?? provider.city.id,
+        data.countryId ?? provider.country?.id,
+        data.regionId ?? provider.region?.id,
+        data.cityId ?? provider.city?.id,
       );
 
       provider.country = country;
@@ -172,7 +181,9 @@ async findOne(id: string): Promise<Provider> {
   }
 
   // Reactivar
-  async reactivate(id: string): Promise<{ message: string; provider: Provider }> {
+  async reactivate(
+    id: string,
+  ): Promise<{ message: string; provider: Provider }> {
     const provider = await this.findOne(id);
     if (provider.status === ProviderStatus.ACTIVE) {
       return { message: 'La cuenta ya está activa', provider };

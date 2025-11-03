@@ -1,10 +1,15 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { UserStatus } from './enums/user-status.enum';
-import { In } from 'typeorm'; 
+import { In } from 'typeorm';
 
 // Servicio encargado de la lógica de negocio de los usuarios.
 // Gestiona operaciones CRUD y consultas específicas.
@@ -43,7 +48,6 @@ export class UsersService {
     }
   }
 
-
   // Obtener todos los usuarios registrados con posibilidad de filtro.
   async findAll(status?: UserStatus): Promise<User[]> {
     const where = status ? { status } : {};
@@ -56,7 +60,8 @@ export class UsersService {
   // Obtener un usuario por su ID.
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    if (!user)
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     return user;
   }
 
@@ -90,7 +95,6 @@ export class UsersService {
     return { message: 'Usuario marcado como eliminado correctamente' };
   }
 
-
   async reactivate(id: string): Promise<{ message: string; user: User }> {
     const user = await this.findOne(id);
     if (!user) throw new NotFoundException('Usuario no encontrado');
@@ -105,4 +109,22 @@ export class UsersService {
     return { message: 'Cuenta reactivada correctamente', user };
   }
 
+  // Completar registro del usuario (Google o registro manual incompleto)
+  async completeProfile(
+    id: string,
+    data: { phone?: string; country?: string },
+  ): Promise<User> {
+    const user = await this.findOne(id);
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+
+    if (data.phone) user.phone = data.phone;
+
+    if (data.country) {
+      user.country = { id: data.country } as any; // ✅ así se asigna FK en TypeORM
+    }
+
+    user.isCompleted = true;
+
+    return await this.userRepository.save(user);
+  }
 }

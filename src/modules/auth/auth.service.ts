@@ -10,6 +10,8 @@ import { ProvidersService } from 'src/modules/providers/providers.service';
 import { Role } from './roles.enum';
 import { ProviderStatus } from '../providers/enums/provider-status.enum';
 import { getGoogleRedirectUrl } from 'src/helpers/redirect.helper';
+import { CreateProviderManualDto } from '../providers/dto/create-provider-manual.dto';
+import { CreateProviderGoogleDto } from '../providers/dto/create-provider-google.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,9 +31,14 @@ export class AuthService {
       ...data,
       email,
       role: data.role || Role.User,
+      country_id: data.country,
     });
 
-    const payload = { id: newUser.id, email: newUser.email, role: newUser.role };
+    const payload = {
+      id: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+    };
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
     return {
@@ -49,26 +56,30 @@ export class AuthService {
   }
 
   // Registro de proveedor (con validación de país, región, ciudad)
-  async registerProvider(data: any) {
+  async registerProvider(data: CreateProviderManualDto) {
     const email = data.email.trim().toLowerCase();
     const existing = await this.providersService.findByEmail(email);
     if (existing) throw new BadRequestException('El correo ya está registrado');
 
-      const newProvider = await this.providersService.create({
-      names: data.firstName,
-      surnames: data.lastName,
-      userName: data.username,
+    const newProvider = await this.providersService.create({
+      names: data.names,
+      surnames: data.surnames,
+      userName: data.userName,
       email,
       phone: data.phone,
       password: data.password,
-      countryId: data.country,
-      regionId: data.region,
-      cityId: data.city,
-      address: data.address || data.Address || data.Adreess,
+      countryId: data.countryId,
+      regionId: data.regionId,
+      cityId: data.cityId,
+      address: data.address || data.address || data.address,
       role: Role.Provider,
     });
 
-    const payload = { id: newProvider.id, email: newProvider.email, role: newProvider.role };
+    const payload = {
+      id: newProvider.id,
+      email: newProvider.email,
+      role: newProvider.role,
+    };
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
     return {
@@ -118,7 +129,11 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, provider.password);
     if (!isMatch) throw new UnauthorizedException('Contraseña incorrecta');
 
-    const payload = { id: provider.id, email: provider.email, role: provider.role };
+    const payload = {
+      id: provider.id,
+      email: provider.email,
+      role: provider.role,
+    };
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
     return {
@@ -152,7 +167,12 @@ export class AuthService {
   }
 
   async loginGoogleUser(user) {
-    const payload = { id: user.id, email: user.email, role: user.role };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isCompleted: user.isCompleted,
+    };
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
     return {
       message: 'Usuario autenticado correctamente',
@@ -162,7 +182,7 @@ export class AuthService {
   }
 
   // Google Provider
-  async validateOrCreateGoogleProvider(providerData) {
+  async validateOrCreateGoogleProvider(providerData: CreateProviderGoogleDto) {
     const email = providerData.email.trim().toLowerCase();
     let provider = await this.providersService.findByEmail(email);
     if (provider) return provider;
@@ -173,7 +193,8 @@ export class AuthService {
 
     let userName = baseName;
 
-    const existingUsername = await this.providersService.findByUsername(userName);
+    const existingUsername =
+      await this.providersService.findByUsername(userName);
     if (existingUsername) {
       const suffix = Math.floor(Math.random() * 10000);
       userName = `${baseName}${suffix}`;
@@ -193,35 +214,27 @@ export class AuthService {
   }
 
   async loginGoogleProvider(provider) {
-    const payload = { id: provider.id, email: provider.email, role: provider.role };
+    const payload = {
+      id: provider.id,
+      email: provider.email,
+      role: provider.role,
+      isCompleted: provider.isCompleted,
+    };
     return {
       access_token: this.jwtService.sign(payload, { expiresIn: '30m' }),
       provider,
     };
   }
 
-
-  
-
   async handleGoogleUserRedirect(user: any) {
-    console.log(' handleGoogleUserRedirect: usuario recibido =>', user);
-
-    if (!user || !user.id) {
-      console.error('❌ Usuario sin ID al manejar redirección Google User');
-      return {
-        redirectUrl:
-          process.env.FRONTEND_BASE_URL + '/login?error=google_user_not_found',
-      };
-    }
-
-    const payload = { id: user.id, email: user.email, role: user.role || Role.User };
+    const payload = { id: user.id, email: user.email, role: user.role };
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
-    const redirectUrl = getGoogleRedirectUrl(user.isCompleted, payload.role, token);
+    const redirectUrl = `${process.env.FRONTEND_BASE_URL}/google-callback-user?token=${token}`;
 
-    console.log(' Redirigiendo al frontend:', redirectUrl);
     return { redirectUrl };
   }
+
   // // Maneja el redireccionamiento cuando un usuario inicia sesión con Google.
   // async handleGoogleUserRedirect(user: any) {
   //   const payload = { id: user.id, email: user.email, role: user.role };
@@ -233,15 +246,18 @@ export class AuthService {
   //   return { redirectUrl };
   // }
 
-
   async handleGoogleProviderRedirect(provider: any) {
-    console.log(' handleGoogleProviderRedirect: proveedor recibido =>', provider);
+    console.log(
+      '🔹 handleGoogleProviderRedirect: proveedor recibido =>',
+      provider,
+    );
 
     if (!provider || !provider.id) {
       console.error('❌ Proveedor sin ID al manejar redirección Google');
       return {
         redirectUrl:
-          process.env.FRONTEND_BASE_URL + '/login?error=google_provider_not_found',
+          process.env.FRONTEND_BASE_URL +
+          '/loginProvider?error=google_provider_not_found',
       };
     }
 
@@ -249,19 +265,25 @@ export class AuthService {
       id: provider.id,
       email: provider.email,
       role: provider.role || Role.Provider,
+      isCompleted: provider.isCompleted,
     };
 
     const token = this.jwtService.sign(payload, { expiresIn: '30m' });
 
-    const redirectUrl = getGoogleRedirectUrl(
-      provider.isCompleted,
-      payload.role,
-      token,
-    );
+    // Si aún no ha completado su perfil
+    if (!provider.isCompleted) {
+      const redirectUrl = `${process.env.FRONTEND_BASE_URL}/google-callback-provider?id=${provider.id}&token=${token}`;
+      console.log(' Redirigiendo al callback provider:', redirectUrl);
+      return { redirectUrl };
+    }
 
-    console.log(' Redirigiendo al frontend:', redirectUrl);
+    // Si ya lo completó, lo mandas directo al dashboard
+    const redirectUrl = `${process.env.FRONTEND_BASE_URL}/provider/dashboard?token=${token}`;
+    console.log(' Redirigiendo al dashboard provider:', redirectUrl);
+
     return { redirectUrl };
   }
+
   // // Maneja el redireccionamiento cuando un proveedor inicia sesión con Google.
   // async handleGoogleProviderRedirect(provider: any) {
   //   const payload = { id: provider.id, email: provider.email, role: provider.role };
@@ -274,4 +296,29 @@ export class AuthService {
 
   //   return { redirectUrl };
   // }
+  // Obtener perfil según rol (para /auth/me)
+  // auth.service.ts
+async getProfile(id: string, role: Role | string) {
+  // 🔹 Normalizamos el rol (por si viene "provider" o "Provider")
+  const normalizedRole = String(role).toLowerCase();
+
+  if (normalizedRole === 'provider') {
+    const provider = await this.providersService.findOne(id);
+    if (!provider) throw new BadRequestException('Proveedor no encontrado');
+    return provider;
+  }
+
+  if (normalizedRole === 'user') {
+    const user = await this.usersService.findOne(id);
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+    return user;
+  }
+
+  if (normalizedRole === 'admin') {
+    return { message: 'Perfil de administrador autenticado correctamente' };
+  }
+
+  throw new BadRequestException(`Rol no válido: ${role}`);
+}
+
 }
