@@ -43,18 +43,20 @@ export class Provider {
   @Column({ type: 'varchar', nullable: false })
   password: string;
 
+
   // Relaciones con entidades de ubicación
   @ManyToOne(() => Country, { eager: true, nullable: true })
   @JoinColumn({ name: 'country_id' })
-  country: Country;
+  country: Country | null;
 
   @ManyToOne(() => Region, { eager: true, nullable: true })
   @JoinColumn({ name: 'region_id' })
-  region: Region;
+  region: Region | null;
 
   @ManyToOne(() => City, { eager: true, nullable: true })
   @JoinColumn({ name: 'city_id' })
-  city: City;
+  city: City | null;
+
 
   @Column({ type: 'varchar', length: 150, nullable: true })
   address: string;
